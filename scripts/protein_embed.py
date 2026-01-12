@@ -51,7 +51,7 @@ def main():
             for i, (lbl, seq) in enumerate(batch):
                 L = len(seq)
                 emb = reps[i, 1:L+1].mean(dim=0).detach().cpu().tolist()
-                out_f.write(lbl + "\t" + " ".join(map(str, emb)) + "\n")
+                out_f.write(" ".join(map(str, emb)) + "\n")
 
 
 if __name__ == "__main__":
