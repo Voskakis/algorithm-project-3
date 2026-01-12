@@ -23,45 +23,38 @@ def read_fasta(filepath: str):
             proteins.append((current_header, "".join(current_sequence)))
     return proteins
 
+def batched(iterable, n):
+    for i in range(0, len(iterable), n):
+        yield iterable[i:i+n]
+
 def main():
+    
     # 1. Φόρτωση Μοντέλου
-    model, alphabet = esm.pretrained.esm2_t6_8M_UR50D() 
+    model, alphabet = esm.pretrained.esm2_t6_8M_UR50D()
     batch_converter = alphabet.get_batch_converter()
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device).eval()
     
     # 2. Προετοιμασία Εισόδου (με Truncation)
-    parser = argparse.ArgumentParser(
-        description="Process vectors and query targets."
-    )
-    parser.add_argument(
-        "-d", "--data",
-        required=True,
-        help="Input data file (e.g. vectors.dat)"
-    )
-    parser.add_argument(
-        "-q", "--query",
-        required=True,
-        help="Query file (e.g. targets.fasta)"
-    )
-    parser.add_argument(
-        "-o", "--output",
-        required=True,
-        help="Output results file (e.g. results.txt)"
-    )
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--data", required=True)
+    parser.add_argument("-q", "--query", required=True)
+    parser.add_argument("-o", "--output", required=True)
     args = parser.parse_args()
-    data = read_fasta(args.data)
-    for item in data:
-        if len(item[1]) > 1022:
-            item[1] = item[1][:1022]
-    query = read_fasta(args.query)
-    labels, strs, tokens = batch_converter(data)
-
-    # 3.Inference 
-    with torch.no_grad(): 
-        results = model(tokens, repr_layers=[6])
+    data = [(h, s[:1022]) for (h, s) in read_fasta(args.data)]
+    query = [(h, s[:1022]) for (h, s) in read_fasta(args.query)]
+    BATCH_SIZE = 16
     
-    # 4. Mean Pooling
-    token_embeddings = results["representations"][6]
-    embedding = token_embeddings.mean(dim=1)
+    with torch.no_grad(): 
+        for batch in batched(data, BATCH_SIZE):
+            labels, strs, tokens = batch_converter(batch)
+            tokens = tokens.to(device)
+            results = model(tokens, repr_layers=[6])
+            reps = results["representations"][6]
+            for i, (lbl, seq) in enumerate(batch):
+                L = len(seq)
+                emb = reps[i, 1:L+1].mean(dim=0).detach().cpu().tolist()
 
 
 if __name__ == "__main__":
