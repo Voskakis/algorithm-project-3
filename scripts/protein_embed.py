@@ -29,23 +29,19 @@ def batched(iterable, n):
 
 def main():
     
-    # 1. Φόρτωση Μοντέλου
     model, alphabet = esm.pretrained.esm2_t6_8M_UR50D()
     batch_converter = alphabet.get_batch_converter()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device).eval()
     
-    # 2. Προετοιμασία Εισόδου (με Truncation)
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--data", required=True)
-    parser.add_argument("-q", "--query", required=True)
+    parser.add_argument("-i", "--data", required=True)
+    parser.add_argument("-m", "--model", required=True)
     parser.add_argument("-o", "--output", required=True)
     args = parser.parse_args()
     data = [(h, s[:1022]) for (h, s) in read_fasta(args.data)]
-    query = [(h, s[:1022]) for (h, s) in read_fasta(args.query)]
     BATCH_SIZE = 16
-    
     with torch.no_grad(): 
         for batch in batched(data, BATCH_SIZE):
             labels, strs, tokens = batch_converter(batch)
