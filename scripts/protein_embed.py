@@ -42,7 +42,7 @@ def main():
     args = parser.parse_args()
     data = [(h, s[:1022]) for (h, s) in read_fasta(args.data)]
     BATCH_SIZE = 16
-    with torch.no_grad(): 
+    with open(args.output, "w") as out_f, torch.no_grad(): 
         for batch in batched(data, BATCH_SIZE):
             labels, strs, tokens = batch_converter(batch)
             tokens = tokens.to(device)
@@ -51,6 +51,7 @@ def main():
             for i, (lbl, seq) in enumerate(batch):
                 L = len(seq)
                 emb = reps[i, 1:L+1].mean(dim=0).detach().cpu().tolist()
+                out_f.write(lbl + "\t" + " ".join(map(str, emb)) + "\n")
 
 
 if __name__ == "__main__":
