@@ -1,0 +1,58 @@
+# Base style
+BasedOnStyle: LLVM
+Language: Cpp
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never           # Options: Always, Never, ForIndentation, ForContinuationAndIndentation
+ContinuationIndentWidth: 8
+
+# Braces
+BreakBeforeBraces: Attach   # Options: Attach, Allman, GNU, Linux, Mozilla, WebKit, Stroustrup
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+# Line breaking
+ColumnLimit: 100
+BreakBeforeBinaryOperators: None
+BreakConstructorInitializers: AfterColon
+ConstructorInitializerIndentWidth: 4
+
+# Whitespace
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesInAngles: false
+SpaceAfterCStyleCast: true
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+
+# Pointers & references
+PointerAlignment: Left      # Options: Left, Right, Middle
+ReferenceAlignment: Left    # Keep &/* close to the type
+
+# Includes
+IncludeBlocks: Regroup      # Group and reorder includes
+IncludeCategories:
+  - Regex: '^<.*\.h>'
+    Priority: 1
+    SortPriority: 0
+  - Regex: '^<.*>'
+    Priority: 2
+    SortPriority: 0
+  - Regex: '.*'
+    Priority: 3
+    SortPriority: 0
+
+# Namespace handling
+NamespaceIndentation: All
+FixNamespaceComments: true
+
+# Misc
+SortIncludes: true
+ReflowComments: true
+AlignTrailingComments: true
+SpacesBeforeTrailingComments: 2
+KeepEmptyLinesAtTheStartOfBlocks: false
