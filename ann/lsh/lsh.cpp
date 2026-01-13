@@ -20,42 +20,78 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    long long unsigned int lines = get_number_of_lines();
+    if (input != 1) {
+        size_t d1;
+        if (!(inFile >> d1))
+            throw std::runtime_error("Failed to read outer dimension");
 
-    // ========================
-    //   EUCLIDEAN LSH
-    // ========================
-    if (metric == 0) {
-        HashTable_Euclidian_Initialization(L);
-        HashFunctions_Euclidian_Initialization(k, L);
+        Euclidian_Hash_Tables.resize(d1);
 
-        // FIRST insert all dataset vectors
-        for (int i = 0; i < lines; i++)
-            Euclidian_Hash_from_file(i, L, k);
+        for (size_t i = 0; i < d1; ++i) {
+            size_t d2;
+            if (!(inFile >> d2))
+                throw std::runtime_error("Failed to read middle dimension");
 
-        // THEN finalize cleanup (removes zeros)
-        Euclidian_Hash_Tables_Finalization(L);
+            Euclidian_Hash_Tables[i].resize(d2);
 
-        if (input != 1) {
-            // Now perform queries (0..lines-1 if query file = input file)
-            Euclidian_LSH_File(L, k, N);
+            for (size_t j = 0; j < d2; ++j) {
+                size_t d3;
+                if (!(inFile >> d3))
+                    throw std::runtime_error("Failed to read inner dimension");
+
+                Euclidian_Hash_Tables[i][j].resize(d3);
+
+                for (size_t k = 0; k < d3; ++k) {
+                    if (!(inFile >> Euclidian_Hash_Tables[i][j][k]))
+                        throw std::runtime_error("Failed to read value");
+                }
+            }
         }
-    }
+        Euclidian_LSH_File(L, k, N);
+    } else {
+        long long unsigned int lines = get_number_of_lines();
 
-    // ========================
-    //   COSINE LSH
-    // ========================
-    if (metric == 1) {
-        HashTable_Cosine_Initialization(L, k);
-        HashFunctions_Cosine_Initialization(L, k);
+        // ========================
+        //   EUCLIDEAN LSH
+        // ========================
+        if (metric == 0) {
+            HashTable_Euclidian_Initialization(L);
+            HashFunctions_Euclidian_Initialization(k, L);
 
-        for (int i = 0; i < lines; i++)
-            Cosine_Hash_from_file(i, L, k);
+            // FIRST insert all dataset vectors
+            for (int i = 0; i < lines; i++)
+                Euclidian_Hash_from_file(i, L, k);
 
-        Hash_Tables_Finalization(L, k);
+            // THEN finalize cleanup (removes zeros)
+            Euclidian_Hash_Tables_Finalization(L);
+        }
 
-        // FIX: pass N
-        Cosine_LSH_File(L, k);
+        // ========================
+        //   COSINE LSH
+        // ========================
+        if (metric == 1) {
+            HashTable_Cosine_Initialization(L, k);
+            HashFunctions_Cosine_Initialization(L, k);
+
+            for (int i = 0; i < lines; i++)
+                Cosine_Hash_from_file(i, L, k);
+
+            Hash_Tables_Finalization(L, k);
+
+            // FIX: pass N
+            Cosine_LSH_File(L, k);
+        }
+
+        outFile << Euclidian_Hash_Tables.size() << '\n';
+        for (const auto& v2 : Euclidian_Hash_Tables) {
+            outFile << v2.size() << '\n';
+            for (const auto& v3 : v2) {
+                outFile << v3.size();
+                for (auto value : v3)
+                    outFile << ' ' << value;
+                outFile << '\n';
+            }
+        }
     }
 
     inFile.close();
