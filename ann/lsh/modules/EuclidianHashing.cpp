@@ -169,6 +169,35 @@ void Euclidian_Hash_Tables_Finalization(int L) {
     }
 
     Euclidian_Hash_from_file(0, L, k);
+
+    outFile << Euclidian_Hash_Tables.size() << '\n';
+    for (const auto& v2 : Euclidian_Hash_Tables) {
+        outFile << v2.size() << '\n';
+        for (const auto& v3 : v2) {
+            outFile << v3.size();
+            for (auto value : v3)
+                outFile << ' ' << value;
+            outFile << '\n';
+        }
+    }
+
+    std::ofstream outt("t");
+    outt << t.size() << '\n';
+    for (double value : t)
+        outt << value << ' ';
+    outt << '\n';
+
+    std::ofstream out("v");
+    out << v.size() << '\n';
+    for (const auto& row : v)
+    {
+        out << row.size();
+        for (double x : row)
+            out << ' ' << x;
+        out << '\n';
+    }
+
+
 }
 
 long long int calcute_euclidian_distance(int input_line, int query_line) {
@@ -451,7 +480,72 @@ void Range_Search_Euclidian(int query_line, double range, int L, int k) {
     points_in_range_euc.clear();
 }
 
+using ULL = unsigned long long;
+using Vec3 = std::vector<std::vector<std::vector<ULL>>>;
+
+Vec3 readEuclidianHashTables(std::istream& in) {
+    Vec3 tables;
+
+    size_t outerSize;
+    if (!(in >> outerSize))
+        throw std::runtime_error("Failed to read outer size");
+
+    tables.resize(outerSize);
+
+    for (size_t i = 0; i < outerSize; ++i) {
+        size_t midSize;
+        in >> midSize;
+        tables[i].resize(midSize);
+
+        for (size_t j = 0; j < midSize; ++j) {
+            size_t innerSize;
+            in >> innerSize;
+            tables[i][j].resize(innerSize);
+
+            for (size_t k = 0; k < innerSize; ++k)
+                in >> tables[i][j][k];
+        }
+    }
+
+    return tables;
+}
+
+std::vector<double> readEuclidianT() {
+    std::ifstream in("t");
+    size_t dcount;
+    in >> dcount;
+    std::vector<double> doubles;
+    doubles.resize(dcount);
+
+    for (size_t i = 0; i < dcount; ++i)
+        in >> doubles[i];
+
+    return doubles;
+}
+
+std::vector<vector<double>> readEuclidianV() {
+	std::ifstream in("v");
+	size_t outerSize;
+	in >> outerSize;
+	std::vector<std::vector<double>> vecs;
+	vecs.resize(outerSize);
+
+	for (size_t i = 0; i < outerSize; ++i) {
+		size_t innerSize;
+		in >> innerSize;
+		vecs[i].resize(innerSize);
+
+		for (size_t j = 0; j < innerSize; ++j)
+			in >> vecs[i][j];
+	}
+
+	return vecs;
+}
+
 void Euclidian_LSH_File(int L, int k, int N) {
+    Euclidian_Hash_Tables = readEuclidianHashTables(inFile);
+    t = readEuclidianT();
+	v = readEuclidianV();
     string str;
     qFile >> str;
 

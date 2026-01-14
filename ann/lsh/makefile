@@ -1,7 +1,10 @@
 CC = g++
 modules = modules/UserInputHandling.cpp modules/EuclidianHashing.cpp modules/modulo_func.cpp modules/randomness.cpp modules/CosineHashing.cpp
-args = -o
+TARGET = lsh
+CXXFLAGS = -g -O0 -Wall -Wextra
+
 lsh:
-	$(CC) lsh.cpp $(modules) $(args) lsh
+	$(CC) $(CXXFLAGS) lsh.cpp $(modules) -o $(TARGET)
+
 clean:
-	rm -rf lsh
+	rm -rf $(TARGET)
