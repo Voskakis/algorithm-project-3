@@ -65,7 +65,7 @@ def exhaustive_search(point_set: list[list[int]], q, N) -> list[list[int]]:
     return result_list
 
 def main():
-    search_input = SearchInput.parse_args()
+    search_input = SearchInput.parse_args() #TODO import SearchInput or replace with new approach
 
     if (search_input.mode == "all" or search_input.mode == "neural"):
         initialize_nlsh(search_input.index_path,search_input.members,search_input.layers,search_input.nodes,
@@ -149,7 +149,7 @@ def main():
                 if (temp_bid < 0.3):
                     bid.append(temp_bid)
                     temp_method_results.append(protein.name)
-                    distance.append(euclidean(protein_vector, query_vector)) #TODO from protein_vectors.dat matching 'protein'
+                    distance.append(euclidean(protein.vector, query_vector))
                     if protein not in temp_blast_results:
                         included.append("No")
                     else:
