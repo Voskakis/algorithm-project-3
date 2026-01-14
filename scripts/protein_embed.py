@@ -54,8 +54,8 @@ def main():
     args = parser.parse_args()
     model, alphabet = esm.pretrained.esm2_t6_8M_UR50D()
     batch_converter = alphabet.get_batch_converter()
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    use_cuda = torch.cuda.is_available() and torch.cuda.get_device_capability(0) >= (7, 0)
+    device = torch.device("cuda" if use_cuda else "cpu")
     model = model.to(device).eval()
     data = [(h, s[:1022]) for (h, s) in read_fasta(args.data)]
     with open(args.output, "w") as out_f, torch.no_grad():
