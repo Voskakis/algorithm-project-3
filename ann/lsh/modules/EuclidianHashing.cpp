@@ -187,17 +187,37 @@ void Euclidian_Hash_Tables_Finalization(int L) {
         outt << value << ' ';
     outt << '\n';
 
-    std::ofstream out("v");
-    out << v.size() << '\n';
-    for (const auto& row : v)
-    {
-        out << row.size();
+    std::ofstream outv("v");
+    outv << v.size() << '\n';
+    for (const auto& row : v) {
+        outv << row.size();
         for (double x : row)
-            out << ' ' << x;
-        out << '\n';
+            outv << ' ' << x;
+        outv << '\n';
     }
 
+    std::ofstream outn("n");
+    outn << n << '\n';
 
+    std::ofstream outd("dim");
+    outd << dim << '\n';
+
+    std::ofstream outeaf("eaf");
+    outeaf << Euclidian_Amplified_Functions.size() << '\n';
+    for (const auto& row : Euclidian_Amplified_Functions) {
+        outeaf << row.size();
+        for (int x : row)
+            outeaf << ' ' << x;
+        outeaf << '\n';
+    }
+
+    std::ofstream outw("w");
+    outw << w << '\n';
+
+    std::ofstream outpoints("points_in_range_euc");
+    outpoints << points_in_range_euc.size() << '\n';
+    for (int x : points_in_range_euc)
+        outpoints << x << ' ';
 }
 
 long long int calcute_euclidian_distance(int input_line, int query_line) {
@@ -524,28 +544,86 @@ std::vector<double> readEuclidianT() {
 }
 
 std::vector<vector<double>> readEuclidianV() {
-	std::ifstream in("v");
-	size_t outerSize;
-	in >> outerSize;
-	std::vector<std::vector<double>> vecs;
-	vecs.resize(outerSize);
+    std::ifstream in("v");
+    size_t outerSize;
+    in >> outerSize;
+    std::vector<std::vector<double>> vecs;
+    vecs.resize(outerSize);
 
-	for (size_t i = 0; i < outerSize; ++i) {
-		size_t innerSize;
-		in >> innerSize;
-		vecs[i].resize(innerSize);
+    for (size_t i = 0; i < outerSize; ++i) {
+        size_t innerSize;
+        in >> innerSize;
+        vecs[i].resize(innerSize);
 
-		for (size_t j = 0; j < innerSize; ++j)
-			in >> vecs[i][j];
-	}
+        for (size_t j = 0; j < innerSize; ++j)
+            in >> vecs[i][j];
+    }
 
-	return vecs;
+    return vecs;
+}
+
+long long int get_n() {
+    std::ifstream in("n");
+    long long int n;
+    in >> n;
+    return n;
+}
+
+int get_dim() {
+    std::ifstream in("dim");
+    int dim;
+    in >> dim;
+    return dim;
+}
+
+std::vector<std::vector<int>> readEuclidianAmplifiedFunctions() {
+    std::ifstream in("eaf");
+    size_t outerSize;
+    in >> outerSize;
+    std::vector<std::vector<int>> vecs;
+    vecs.resize(outerSize);
+
+    for (size_t i = 0; i < outerSize; ++i) {
+        size_t innerSize;
+        in >> innerSize;
+        vecs[i].resize(innerSize);
+
+        for (size_t j = 0; j < innerSize; ++j)
+            in >> vecs[i][j];
+    }
+
+    return vecs;
+}
+
+int readEuclidianW() {
+    std::ifstream in("w");
+    int w;
+    in >> w;
+    return w;
+}
+
+std::vector<int> readEuclidianPointsInRangeEuc() {
+    std::ifstream in("points_in_range_euc");
+    size_t size;
+    in >> size;
+    std::vector<int> points;
+    points.resize(size);
+
+    for (size_t i = 0; i < size; ++i)
+        in >> points[i];
+
+    return points;
 }
 
 void Euclidian_LSH_File(int L, int k, int N) {
     Euclidian_Hash_Tables = readEuclidianHashTables(inFile);
     t = readEuclidianT();
-	v = readEuclidianV();
+    v = readEuclidianV();
+    n = get_n();
+    dim = get_dim();
+    Euclidian_Amplified_Functions = readEuclidianAmplifiedFunctions();
+    w = readEuclidianW();
+    points_in_range_euc = readEuclidianPointsInRangeEuc();
     string str;
     qFile >> str;
 
