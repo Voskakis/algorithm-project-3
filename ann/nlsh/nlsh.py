@@ -8,29 +8,32 @@ from transformers.models.auto.image_processing_auto import model_type
 
 model = None
 inverted_file = None
-bins_check = None
 input_data = None
+constants = [] #TODO fill these
 
-def initialize_nlsh(index_path:Path, members, layers, nodes, bins, input): #TODO turn all those into fixed/config file from fixed
+def initialize_nlsh(_input):
+    index_path = Path(constants[0])
+    members = constants[1]
+    layers = constants[2]
+    nodes = constants[3]
     input_dim = 320
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     global model
     global inverted_file
-    global bins_check
     global input_data
     model = MLPClassifier(d_in=input_dim, n_out=members, layers=layers,
                           nodes=nodes).to(device)
     model.load_state_dict(torch.load(index_path.name + "/model.pt"))
     model.eval()
     inverted_file = load_inverted_file(index_path.name + "/inverted_file.txt")
-    bins_check=bins
-    input_data = input
+    bins_check= constants[4]
+    input_data = _input
 
 
 def search_nlsh(q):
     global model
     global inverted_file
-    global bins_check
+    bins_check = constants[4]
     global input_data
     # prediction
     query_tensor = torch.tensor(q, dtype=torch.float32).unsqueeze(0).view(1, -1)

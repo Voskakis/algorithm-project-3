@@ -1,14 +1,12 @@
+import argparse
 import math
+import sys
 import time
 import subprocess
 from ann.nlsh.nlsh import initialize_nlsh, search_nlsh
 from blast.blast_results import results_by_BLAST, load_BLAST_results
 from blast.blast_compare import blast_identity_by_fasta_id
-
-#TODO port what needs porting
-
-from enums import EndianType
-from my_types import SearchInput
+from scripts import protein_embed
 
 def format_output(protein_ID: str, TopN: int, methods: list[str], BLAST_time: float,
                   method_rec: list[float], method_included: list[list[str]],
@@ -65,18 +63,24 @@ def exhaustive_search(point_set: list[list[int]], q, N) -> list[list[int]]:
     return result_list
 
 def main():
-    search_input = SearchInput.parse_args() #TODO import SearchInput or replace with new approach
+    parser = argparse.ArgumentParser(description="Query on an embedded database")
+    parser.add_argument("-d", "--database", required=True, help="Input embeds file")
+    parser.add_argument("-q", "--query", required=True, help="List of sequence queries")
+    parser.add_argument("-o", "--output", required=True, help="Output directory")
+    parser.add_argument("-m", "--method", required=True, help="Options are all/lsh/neural/hypercube/ivf")
+    parser.add_argument("-f", "--fasta", required=True, help="Pre-embedding fasta file")
+    parser.add_argument("-n", "--number", required=True, help="Count of results to retrieve")
+    args = parser.parse_args()
 
-    if (search_input.mode == "all" or search_input.mode == "neural"):
-        initialize_nlsh(search_input.index_path,search_input.members,search_input.layers,search_input.nodes,
-                        search_input.bins_check, search_input.input_data)
+    if args.method == "all" or args.method == "neural":
+        initialize_nlsh(args.database)
 
 
 
-    outputFile = open(search_input.output_file, "a")
+    outputFile = open(args.output, "a")
 
     modes = ["BLAST"]
-    match search_input.mode:
+    match args.method:
         case "all":
             modes.append("Euclidean LSH")
             # modes.append("hypercube")
@@ -94,16 +98,23 @@ def main():
     #Handle BLAST work
 
     start = time.time()
-    results_by_BLAST(search_input.input_data, search_input.query_file, "blast_results.tsv")
+    results_by_BLAST(args.database, args.query, "blast_results.tsv")
     end = time.time()
-    BLAST_time = (end - start)/len(search_input.query_data)
-    BLAST_results = load_BLAST_results(search_input.nearest_neighbors, "blast_results.tsv")
+    BLAST_time = (end - start)/len(args.query)
+    BLAST_results = load_BLAST_results(args.number, "blast_results.tsv")
 
-
-    #TODO make embeds of the query file, result must me in the following format
+    query_data_parsed = []
+    argv_holder = sys.argv
+    sys.argv = ["protein_embed.py",'-i', 'search_input.query_file', '-o', 'query_vectors.dat']
+    protein_embed.main()
+    sys.argv = argv_holder
+    with open('query_vectors.dat', "r") as q_vecs:
+        for line in q_vecs:
+            elements = line.split('\t')
+            query_data_parsed.append((elements[0], elements[1:]))
     query_data_parsed = [('name','vector')]
 
-    for q, index in zip(query_data_parsed, range(len(search_input.query_data))):
+    for q, index in zip(query_data_parsed, range(len(args.query))):
         query_vector  = q[1]
         query_name    = q[0]
 
@@ -116,20 +127,20 @@ def main():
 
         for mode in modes:
             start = time.time()
-            if (mode=="BLAST"):
+            if mode== "BLAST":
                 continue
-            elif (mode=="Neural LSH"):
+            elif mode== "Neural LSH":
                 method_results.append(exhaustive_search(
                     search_nlsh(query_vector),
-                    query_vector, search_input.nearest_neighbors))
+                    query_vector, args.number))
 
-            elif (mode=="Euclidean LSH"):
+            elif mode== "Euclidean LSH":
                 result = subprocess.check_output(
                     #["./lsh", "-d", f"./{build_input.input_file}", "-q", f"./{build_input.input_file}", "-k", f"10",
                     # "-L", f"{build_input.batch_size}", "-N",
                     # f"{build_input.knn_neighbors + 1}", "-o", "output.txt"] TODO handle LSH I/O
                 )
-                method_results.append(result.decode("utf-8"))
+                method_results.append(result)
 
 
             end = time.time()
@@ -143,14 +154,15 @@ def main():
             bid = []
             distance = []
             temp_method_results = []
-            for protein in method_results:
-                #TODO format it similarly by splitting name and vector, if needed
-                temp_bid = blast_identity_by_fasta_id(search_input.fasta, query_vector, protein.name)
-                if (temp_bid < 0.3):
+            for pre_protein in method_results:
+                elements = pre_protein.split('\t')
+                protein = (elements[0], elements[1:])
+                temp_bid = blast_identity_by_fasta_id(args.fasta, query_vector, protein[0])
+                if temp_bid < 0.3:
                     bid.append(temp_bid)
-                    temp_method_results.append(protein.name)
-                    distance.append(euclidean(protein.vector, query_vector))
-                    if protein not in temp_blast_results:
+                    temp_method_results.append(protein[0])
+                    distance.append(euclidean(protein[1], query_vector))
+                    if protein[0] not in temp_blast_results:
                         included.append("No")
                     else:
                         included.append("Yes")
@@ -161,7 +173,7 @@ def main():
             method_distance.append(distance)
 
         # output
-        outputBlock = format_output(query_name, search_input.nearest_neighbors, modes, BLAST_time, method_rec,
+        outputBlock = format_output(query_name, args.number, modes, BLAST_time, method_rec,
                                     method_included, method_results, method_bid, method_distance, method_time)
         outputFile.write(outputBlock)
         print(outputBlock)

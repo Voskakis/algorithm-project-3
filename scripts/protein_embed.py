@@ -69,7 +69,8 @@ def main():
                 results = model(tokens, repr_layers=[6])
             reps = results["representations"][6]
             for lbl, emb_cpu in mean_pool_per_sequence(reps, batch):
-                out_f.write(" ".join(map(str, emb_cpu.tolist())) + "\n")
+                out_f.write(lbl + "\t" + " ".join(map(str, emb_cpu.tolist())) + "\n")
+                out_f.flush()
             del tokens, results, reps
             if device.type == "cuda":
                 torch.cuda.empty_cache()
