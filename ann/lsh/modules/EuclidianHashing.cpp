@@ -615,7 +615,7 @@ std::vector<int> readEuclidianPointsInRangeEuc() {
     return points;
 }
 
-void Euclidian_LSH_File(int L, int k, int N) {
+void Euclidian_LSH_File_With_Prints(int L, int k, int N) {
     Euclidian_Hash_Tables = readEuclidianHashTables(inFile);
     t = readEuclidianT();
     v = readEuclidianV();
@@ -624,6 +624,31 @@ void Euclidian_LSH_File(int L, int k, int N) {
     Euclidian_Amplified_Functions = readEuclidianAmplifiedFunctions();
     w = readEuclidianW();
     points_in_range_euc = readEuclidianPointsInRangeEuc();
+    string str;
+    qFile >> str;
+
+    double radius;
+    long long unsigned int queries;
+
+    if (str.compare("Radius:") == 0) {
+        qFile >> radius;
+        cout << "radius is " << radius << endl;
+
+        queries = get_number_of_queries();
+
+        for (int q = 1; q < queries; q++) {
+            Range_Search_Euclidian(q, radius, L, k);
+        }
+    } else {
+        queries = get_number_of_queries();
+
+        for (int q = 0; q < queries; q++) {
+            Nearest_Query_Euclidian(q, L, k, N);
+        }
+    }
+}
+
+void Euclidian_LSH_File(int L, int k, int N) {
     string str;
     qFile >> str;
 

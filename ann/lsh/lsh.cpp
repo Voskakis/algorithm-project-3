@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (input != 1) {
-        Euclidian_LSH_File(L, k, N);
+        Euclidian_LSH_File_With_Prints(L, k, N);
     } else {
         long long unsigned int lines = get_number_of_lines();
 
@@ -29,6 +29,7 @@ int main(int argc, char* argv[]) {
 
             // THEN finalize cleanup (removes zeros)
             Euclidian_Hash_Tables_Finalization(L);
+            Euclidian_LSH_File(L, k, N);
         }
 
         // ========================

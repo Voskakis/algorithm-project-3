@@ -48,6 +48,7 @@ void Search_Euclidian_Hash_Tables(int line,int L); /* For debugging purposes, se
 void Euclidian_Hash_Tables_Finalization(int L); /* Finilization of Hash tables */
 
 void Euclidian_LSH_File(int L,int k, int N); /* Calls the appropriate functions to perform LSH queries */
+void Euclidian_LSH_File_With_Prints(int L,int k, int N); /* Calls the appropriate functions to perform LSH queries */
 
 long long int calcute_euclidian_distance(int input_line, int query_line); /* Calculates euclidian distance between a and b */
 
