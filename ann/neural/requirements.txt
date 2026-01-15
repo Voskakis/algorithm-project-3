@@ -1,0 +1,8 @@
+pip==25.3
+setuptools==58.1.0
+pandas==2.2.3
+numpy==1.26.4
+kahip==3.22
+
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch
