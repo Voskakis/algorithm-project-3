@@ -1,6 +1,7 @@
 #include "modules/CosineHashing.h"
 #include "modules/EuclidianHashing.h"
 #include "modules/UserInputHandling.h"
+#include "modules/globals.cpp"
 
 using namespace std;
 
