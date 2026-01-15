@@ -50,7 +50,6 @@ def main():
     parser = argparse.ArgumentParser(description="Embed protein sequences with ESM2 (OOM-safe batching).")
     parser.add_argument("-i", "--data", required=True, help="Input FASTA file")
     parser.add_argument("-o", "--output", required=True, help="Output embeddings (one line per sequence)")
-    parser.add_argument("-m", "--model", required=True)
     args = parser.parse_args()
     model, alphabet = esm.pretrained.esm2_t6_8M_UR50D()
     batch_converter = alphabet.get_batch_converter()
