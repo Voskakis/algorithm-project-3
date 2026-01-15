@@ -4,15 +4,6 @@
 
 using namespace std;
 
-ifstream inFile;
-ifstream qFile;
-ofstream outFile;
-
-int k = 4;  // number of LSH functions
-int L = 5;  // number of hash tables
-int N = 5;  // number of nearest neighbors
-bool metric = 0;
-
 int main(int argc, char* argv[]) {
     int input = user_input_handling(argc, argv);
     if (input == -1) {

@@ -146,9 +146,10 @@ int user_input_handling(int argc, char* argv[]) {
                 return -1;
             }
         } else {
+            cout << argv[cur_arg] << endl;
             cout << "Invalid Arguments Given.Available Arguments are:" << endl;
 
-            cout << "-d -k -o -L -metric" << endl;
+            cout << "-d -k -o -L -metric -N --for-build-only" << endl;
 
             return -1;
         }
