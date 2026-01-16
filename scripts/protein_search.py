@@ -3,7 +3,10 @@ import sys
 import tempfile
 import time
 import subprocess
-from ann.neural import initialize_nlsh, search_nlsh, exhaustive_search_modular, euclidean
+
+from numpy.f2py.auxfuncs import throw_error
+
+from ann.neural import initialize_nlsh, search_nlsh, euclidean
 from blast.blast_results import results_by_BLAST, load_BLAST_results
 from blast.blast_compare import blast_identity_by_fasta_id
 from scripts import protein_embed
@@ -92,7 +95,7 @@ def main():
     database_parsed = []
     with open(args.database, 'r') as database:
         for datum in database:
-            elements = line.split('\t')
+            elements = datum.split('\t')
             database_parsed.append((elements[0], elements[1:]))
 
 
@@ -112,24 +115,29 @@ def main():
             if mode== "BLAST":
                 continue
             elif mode== "Neural LSH":
-                method_results.append(exhaustive_search_modular(
-                    search_nlsh(query_vector),
-                    query_vector, args.number))
-                #TODO fix the above
+                result = search_nlsh(query_vector, args.number),     #this one's output is of the format [num_id, num_id,...]
+                temp_results = []
+                for r in result:
+                    temp_results.append(database_parsed[r])
+                method_results.append(temp_results)
 
             elif mode== "Euclidean LSH":
+                result = ""
                 with tempfile.NamedTemporaryFile() as tmp:
                     tmp.write(query_vector)
-                    result = subprocess.check_output(
+                    result = subprocess.check_output( #output format is "num_id num_id num_id ..."
                         ["./lsh", "-d", "LSH_index.dat", "-q", f"./{tmp.name}",
                          "-N", f"{args.number}", "-o", "output.txt"]
                     )
+                if result=="":
+                    throw_error("protein_search, line 135ish, 'with' scope issue")
                 temp_results = []
-                for result_index in result.split(" "):
+                for r in result.split(' '):
+                    result_index = int(r)
                     temp_results.append(database_parsed[result_index])
                 method_results.append(temp_results)
 
-
+            #method_results must be of form [(2, [2,2,2,2]),...]
             end = time.time()
             method_time.append(end - start)
             temp_blast_results = BLAST_results[query_name]
@@ -141,9 +149,7 @@ def main():
             bid = []
             distance = []
             temp_method_results = []
-            for pre_protein in method_results:
-                elements = pre_protein.split('\t')
-                protein = (elements[0], elements[1:])
+            for protein in method_results:
                 temp_bid = blast_identity_by_fasta_id(args.fasta, query_vector, protein[0])
                 if temp_bid < 0.3:
                     bid.append(temp_bid)

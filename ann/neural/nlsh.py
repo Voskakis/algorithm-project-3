@@ -1,7 +1,7 @@
 import math
 from pathlib import Path
 
-from build_pipeline import MLPClassifier, load_inverted_file
+from ann.neural.build_pipeline import MLPClassifier, load_inverted_file
 import torch
 import torch.nn.functional as F
 from torch.utils.data import TensorDataset
@@ -15,11 +15,11 @@ constants = ["./data/lsh.output.txt", 100, 3, 64, 5, 0.03, 1, 10, 128, 0.001]
 def euclidean(vector1, vector2):
     total = 0
     for x, y in zip(vector1, vector2):
-        total += (x - y)**2
+        total += (x - y) ** 2
     return math.sqrt(total)
 
 def add_better_result_modular(point, q, result_list, N):
-    distance = euclidean(point[0], q)
+    distance = euclidean(point[1], q)
     if len(result_list) < N:
         result_list.append([point, distance])
     elif distance < result_list[0][1]:
@@ -29,12 +29,13 @@ def add_better_result_modular(point, q, result_list, N):
         result_list[0], result_list[max_index] = result_list[max_index], result_list[0]
     return result_list
 
-def exhaustive_search_modular(point_set: list[tuple[list[int],int]], q, N) -> list[list[int]]:
+
+def exhaustive_search_modular(point_set: list[tuple[int, list[int]]], q:list[int], N:int) -> list[tuple[int, list[int]]]:
     result_list = []
     for point in point_set:
         result_list = add_better_result_modular(point, q, result_list, N)
-    result_list = sorted(result_list, key=lambda x: x[0][1])
-    return result_list
+    result_list = sorted(result_list, key=lambda x: x[1])
+    return [(result[0][0]) for result in result_list]
 
 def initialize_nlsh(_input):
     index_path = Path(constants[0])
@@ -54,7 +55,7 @@ def initialize_nlsh(_input):
     input_data = _input
 
 
-def search_nlsh(q):
+def search_nlsh(q, num):
     global model
     global inverted_file
     bins_check = constants[4]
@@ -74,7 +75,8 @@ def search_nlsh(q):
         for pointID in inverted_file[label]:
             search_space.append((input_data[pointID], pointID))
     # exhaustive search
-    return search_space
+    return exhaustive_search_modular(search_space, q, num)
+
 
 def build_modular_nlsh():
     index_path = Path(constants[0])
