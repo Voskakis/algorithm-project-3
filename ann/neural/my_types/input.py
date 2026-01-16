@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from enums import EndianType
-from enums.kahip_modes import KahipMode
+from ann.neural.enums import EndianType
+from ann.neural.enums.kahip_modes import KahipMode
 
 
 def parse_bool(x: str) -> bool:
