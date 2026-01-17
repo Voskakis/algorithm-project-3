@@ -1,8 +1,6 @@
 #include "modules/CosineHashing.h"
 #include "modules/EuclidianHashing.h"
 #include "modules/UserInputHandling.h"
-#include "modules/globals.cpp"
-
 using namespace std;
 
 int main(int argc, char* argv[]) {
@@ -25,11 +23,14 @@ int main(int argc, char* argv[]) {
             HashFunctions_Euclidian_Initialization(k, L);
 
             // FIRST insert all dataset vectors
-            for (int i = 0; i < lines; i++)
+            for (int i = 0; i < lines; i++){
                 Euclidian_Hash_from_file(i, L, k);
+                cout << "Inserting line " << i << endl;
+            }
 
             // THEN finalize cleanup (removes zeros)
             Euclidian_Hash_Tables_Finalization(L);
+            cout << "Finalized Hash Tables" << endl;
             Euclidian_LSH_File(L, k, N);
         }
 

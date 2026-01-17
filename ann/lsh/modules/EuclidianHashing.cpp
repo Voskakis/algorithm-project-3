@@ -31,7 +31,7 @@ void HashFunctions_Euclidian_Initialization(int k, int L) {
 
     /* Now lets initialize the w which will be used */
 
-    w = 400;
+    w = 5;
 
     /* Initialize Amplified_Euclidian_Functions */
 
@@ -146,9 +146,9 @@ void Euclidian_Hash_from_file(int line, int L, int k) {
             string_to_hash.append(to_string(sum));
         }
 
-        pos = modulo(hash<string>{}(string_to_hash), BIG_INT);
+        //pos = modulo(hash<string>{}(string_to_hash), 200000);
 
-        pos = modulo(pos, n / 2);
+        pos = modulo(hash<string>{}(string_to_hash), n / 2);
 
         // cout << "Pushing " << line << " to [" << amp_func << "][" << pos << "]" << endl;
 
@@ -256,7 +256,7 @@ long long unsigned int euclidian_hash_query(int query_line, int amp_func, int k)
 
     string string_to_hash;
 
-    long long int sum;
+    long double sum;
 
     double x;
 
@@ -287,6 +287,7 @@ long long unsigned int euclidian_hash_query(int query_line, int amp_func, int k)
         sum = sum + t[h];
 
         sum = floor(sum / (double) w);
+        sum = floor(sum);
 
         get_query(query_line); /* Reset the line for the next hash function */
 
@@ -393,7 +394,7 @@ void Nearest_Query_Euclidian(int query_line, int L, int k, int N) {
 
             update_best(*i, dist);
 
-            time_to_break--;
+            //time_to_break--;
             if (time_to_break <= 0)
                 break;
         }
