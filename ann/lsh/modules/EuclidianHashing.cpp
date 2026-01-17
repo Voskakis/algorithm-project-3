@@ -104,7 +104,7 @@ void Euclidian_Hash_from_file(int line, int L, int k) {
 
     string string_to_hash;
 
-    long long int sum;
+    long double sum;
 
     double x;
 
