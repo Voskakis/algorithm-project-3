@@ -146,7 +146,7 @@ void Euclidian_Hash_from_file(int line, int L, int k) {
             string_to_hash.append(to_string(sum));
         }
 
-        //pos = modulo(hash<string>{}(string_to_hash), 200000);
+        // pos = modulo(hash<string>{}(string_to_hash), 200000);
 
         pos = modulo(hash<string>{}(string_to_hash), n / 2);
 
@@ -170,38 +170,29 @@ void Euclidian_Hash_Tables_Finalization(int L) {
 
     Euclidian_Hash_from_file(0, L, k);
 
-    outFile << Euclidian_Hash_Tables.size() << '\n';
-    for (const auto& v2 : Euclidian_Hash_Tables) {
-        outFile << v2.size() << '\n';
-        for (const auto& v3 : v2) {
-            outFile << v3.size();
-            for (auto value : v3)
-                outFile << ' ' << value;
-            outFile << '\n';
-        }
-    }
+    Store_Euclidian_Hash_Tables();
+    Store_t();
+    Store_v();
+    Store_n();
+    Store_dim();
+    Store_Euclidian_Amplified_Functions();
+    Store_w();
+    Store_points_in_range_euc();
+}
 
-    std::ofstream outt("t");
-    outt << t.size() << '\n';
-    for (double value : t)
-        outt << value << ' ';
-    outt << '\n';
+void Store_points_in_range_euc() {
+    std::ofstream outpoints("points_in_range_euc");
+    outpoints << points_in_range_euc.size() << '\n';
+    for (int x : points_in_range_euc)
+        outpoints << x << ' ';
+}
 
-    std::ofstream outv("v");
-    outv << v.size() << '\n';
-    for (const auto& row : v) {
-        outv << row.size();
-        for (double x : row)
-            outv << ' ' << x;
-        outv << '\n';
-    }
+void Store_w() {
+    std::ofstream outw("w");
+    outw << w << '\n';
+}
 
-    std::ofstream outn("n");
-    outn << n << '\n';
-
-    std::ofstream outd("dim");
-    outd << dim << '\n';
-
+void Store_Euclidian_Amplified_Functions() {
     std::ofstream outeaf("eaf");
     outeaf << Euclidian_Amplified_Functions.size() << '\n';
     for (const auto& row : Euclidian_Amplified_Functions) {
@@ -210,14 +201,49 @@ void Euclidian_Hash_Tables_Finalization(int L) {
             outeaf << ' ' << x;
         outeaf << '\n';
     }
+}
 
-    std::ofstream outw("w");
-    outw << w << '\n';
+void Store_n() {
+    std::ofstream outn("n");
+    outn << n << '\n';
+}
 
-    std::ofstream outpoints("points_in_range_euc");
-    outpoints << points_in_range_euc.size() << '\n';
-    for (int x : points_in_range_euc)
-        outpoints << x << ' ';
+void Store_dim() {
+    std::ofstream outd("dim");
+    outd << dim << '\n';
+}
+
+void Store_v() {
+    std::ofstream outv("v");
+    outv << v.size() << '\n';
+    for (const auto& row : v) {
+        outv << row.size();
+        for (double x : row)
+            outv << ' ' << x;
+        outv << '\n';
+    }
+}
+
+void Store_Euclidian_Hash_Tables() {
+    std::ofstream outEuclidian_Hash_Tables("Euclidian_Hash_Tables");
+    outEuclidian_Hash_Tables << Euclidian_Hash_Tables.size() << '\n';
+    for (const auto& v2 : Euclidian_Hash_Tables) {
+        outEuclidian_Hash_Tables << v2.size() << '\n';
+        for (const auto& v3 : v2) {
+            outEuclidian_Hash_Tables << v3.size();
+            for (auto value : v3)
+                outEuclidian_Hash_Tables << ' ' << value;
+            outEuclidian_Hash_Tables << '\n';
+        }
+    }
+}
+
+void Store_t() {
+    std::ofstream outt("t");
+    outt << t.size() << '\n';
+    for (double value : t)
+        outt << value << ' ';
+    outt << '\n';
 }
 
 long long int calcute_euclidian_distance(int input_line, int query_line) {
@@ -394,7 +420,7 @@ void Nearest_Query_Euclidian(int query_line, int L, int k, int N) {
 
             update_best(*i, dist);
 
-            //time_to_break--;
+            // time_to_break--;
             if (time_to_break <= 0)
                 break;
         }
@@ -504,9 +530,9 @@ void Range_Search_Euclidian(int query_line, double range, int L, int k) {
 using ULL = unsigned long long;
 using Vec3 = std::vector<std::vector<std::vector<ULL>>>;
 
-Vec3 readEuclidianHashTables(std::istream& in) {
+Vec3 readEuclidianHashTables() {
     Vec3 tables;
-
+    std::ifstream in("Euclidian_Hash_Tables");
     size_t outerSize;
     if (!(in >> outerSize))
         throw std::runtime_error("Failed to read outer size");
@@ -617,7 +643,7 @@ std::vector<int> readEuclidianPointsInRangeEuc() {
 }
 
 void Euclidian_LSH_File_With_Prints(int L, int k, int N) {
-    Euclidian_Hash_Tables = readEuclidianHashTables(inFile);
+    Euclidian_Hash_Tables = readEuclidianHashTables();
     t = readEuclidianT();
     v = readEuclidianV();
     n = get_n();
