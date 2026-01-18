@@ -171,7 +171,7 @@ void Euclidian_Hash_Tables_Finalization(int L) {
     Euclidian_Hash_from_file(0, L, k);
 
     Store_Euclidian_Hash_Tables();
-    Store_t();
+    Store_tt();
     Store_v();
     Store_n();
     Store_dim();
@@ -238,7 +238,7 @@ void Store_Euclidian_Hash_Tables() {
     }
 }
 
-void Store_t() {
+void Store_tt() {
     std::ofstream outt("t");
     outt << t.size() << '\n';
     for (double value : t)
