@@ -22,8 +22,6 @@ int main(int argc, char* argv[]) {
             HashTable_Euclidian_Initialization(L);
             HashFunctions_Euclidian_Initialization(k, L);
 
-
-
             // FIRST insert all dataset vectors
             int fileCount = 0;
             int split = floor(lines/10);

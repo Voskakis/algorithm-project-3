@@ -3,6 +3,35 @@
 
 using namespace std;
 
+vector<vector<double>> dataset;
+vector<vector<double>> queryset;
+
+void LoadDataset() {
+    string line;
+    while (getline(inFile, line)) {
+        istringstream iss(line);
+        dataset.emplace_back();
+
+        double x;
+        while (iss >> x) {
+            dataset.back().push_back(x);
+        }
+    }
+}
+
+void LoadQuery() {
+    string line;
+    while (getline(qFile, line)) {
+        istringstream iss(line);
+        queryset.emplace_back();
+
+        double x;
+        while (iss >> x) {
+            queryset.back().push_back(x);
+        }
+    }
+}
+
 void HashTable_Euclidian_Initialization(int L) {
     /* We have L hash tables with n/2 size each */
 
@@ -10,9 +39,13 @@ void HashTable_Euclidian_Initialization(int L) {
 
     dim = get_dim_of_data();
 
+    LoadDataset();
+
     Euclidian_Hash_Tables.resize(
             L, vector<vector<long long unsigned int>>(n / 2, vector<long long unsigned int>(1000)));
 }
+
+
 
 void HashFunctions_Euclidian_Initialization(int k, int L) {
     /* First lets fill out the v vectors used for the euclidian hashing method */
@@ -33,7 +66,7 @@ void HashFunctions_Euclidian_Initialization(int k, int L) {
 
     /* Now lets initialize the w which will be used */
 
-    w = 2;
+    w = 1;
 
     /* Initialize Amplified_Euclidian_Functions */
 
@@ -83,6 +116,14 @@ void HashFunctions_Euclidian_Initialization(int k, int L) {
 
 }
 
+long double numConcat(long double a, long double b)
+{
+    long long bi = static_cast<long long>(b);
+    long long p = 1;
+    for (long long t = bi; t; t /= 10) p *= 10;
+    return a * p + bi;
+}
+
 void Search_Euclidian_Hash_Tables(int line, int L) {
     for (int i = 0; i < L; i++) {
         for (int j = 0; j < n / 2; j++) {
@@ -99,15 +140,14 @@ void Search_Euclidian_Hash_Tables(int line, int L) {
 void Euclidian_Hash_from_file(int line, int L, int k) {
     /* First lets get to the line pointed */
 
-    move_input_to_line(line);
+   //move_input_to_line(line);
 
     /* Now onto hashing! */
 
     string string_to_hash;
+    long double sum_to_hash = 0;
 
     long double sum;
-
-    double x;
 
     string str;
 
@@ -116,7 +156,7 @@ void Euclidian_Hash_from_file(int line, int L, int k) {
     for (int amp_func = 0; amp_func < L;
          amp_func++) { /* We have to hash each vector with each Amplified function */
 
-        string_to_hash = "";
+        sum_to_hash = 0;
 
         for (int h = 0; h < k; h++) { /* We have to hash each vector with each Hash Function in the
                                          amp_func Amplified Function */
@@ -129,27 +169,24 @@ void Euclidian_Hash_from_file(int line, int L, int k) {
 
                 // if( i == 0 ) inFile >> str; /* First int is an id, so skip it */
 
-                inFile >> x; /* Get the first int from the file */
+                //inFile >> x; /* Get the first int from the file */
 
                 // cout << "Adding to  " << sum << " with " << x* Hash_Function[
                 // Amplified_Functions[amp_func][h] ][i] << endl;
 
-                sum = sum + x * v[Euclidian_Amplified_Functions[amp_func][h]]
+                sum = sum + dataset[line][i] * v[Euclidian_Amplified_Functions[amp_func][h]]
                                  [i]; /* Sum is calculating the inner product of the two vectors */
             }
 
             sum = sum + t[h];
-
             sum = floor(sum / (double) w);
 
-            move_input_to_line(line); /* Reset the line for the next hash function */
-
-            string_to_hash.append(to_string(sum));
+            sum_to_hash = numConcat(sum_to_hash, sum);
         }
 
-        // pos = modulo(hash<string>{}(string_to_hash), 200000);
-
-        pos = modulo(hash<string>{}(string_to_hash), n / 2);
+        //pos = modulo(hash<string>{}(string_to_hash), 200000);
+        pos = modulo(hash<long double>{}(sum_to_hash), n / 2);
+        //pos = modulo(hash<string>{}(string_to_hash), n / 2);
 
         // cout << "Pushing " << line << " to [" << amp_func << "][" << pos << "]" << endl;
 
@@ -259,9 +296,9 @@ void Store_tt() {
 long double calcute_euclidian_distance(int input_line, int query_line) {
     /* First lets get the vectors specified in both the input and the query file */
 
-    get_query(query_line);
+    //get_query(query_line);
 
-    move_input_to_line(input_line);
+    //move_input_to_line(input_line);
 
     // cout << "Calculating Distance Between input_line " << input_line << " and query_line " <<
     // query_line << endl;
@@ -273,9 +310,9 @@ long double calcute_euclidian_distance(int input_line, int query_line) {
     long double dist = 0;
 
     for (int i = 0; i < dim; i++) {
-        inFile >> x;
+        x = dataset[input_line][i];
 
-        qFile >> y;
+        y = queryset[query_line][i];
 
         dist = dist + (x - y) * (x - y);
 
@@ -324,9 +361,8 @@ void Euclidian_Hash_Tables_Finalization(int L) {
 }
 
 long long unsigned int euclidian_hash_query(int query_line, int amp_func, int k) {
-    get_query(query_line);
+    //get_query(query_line);
 
-    string string_to_hash;
 
     long double sum;
 
@@ -334,12 +370,13 @@ long long unsigned int euclidian_hash_query(int query_line, int amp_func, int k)
 
     long long unsigned int pos;
 
-    string_to_hash = "";
+    long double sum_to_hash = 0;
 
     for (int h = 0; h < k; h++) { /* We have to hash each vector with each Hash Function in the
                                      amp_func Amplified Function */
 
         sum = 0;
+
 
         for (int i = 0; i < dim;
              i++) { /* In order to calculate the Inner product of the hash vecor and the data vector
@@ -347,12 +384,12 @@ long long unsigned int euclidian_hash_query(int query_line, int amp_func, int k)
 
             // if( i == 0 ) inFile >> x; /* First int is an id, so skip it */
 
-            qFile >> x; /* Get the first int from the file */
+            //qFile >> x; /* Get the first int from the file */
 
             // cout << "Adding to  " << sum << " with " << x* Hash_Function[
             // Amplified_Functions[amp_func][h] ][i] << endl;
 
-            sum = sum + x * v[Euclidian_Amplified_Functions[amp_func][h]]
+            sum = sum + queryset[query_line][i] * v[Euclidian_Amplified_Functions[amp_func][h]]
                              [i]; /* Sum is calculating the inner product of the two vectors */
         }
 
@@ -361,13 +398,12 @@ long long unsigned int euclidian_hash_query(int query_line, int amp_func, int k)
         sum = floor(sum / (double) w);
         sum = floor(sum);
 
-        get_query(query_line); /* Reset the line for the next hash function */
-
-        string_to_hash = string_to_hash + to_string(sum);
+        //get_query(query_line); /* Reset the line for the next hash function */
+        sum_to_hash = numConcat(sum_to_hash, sum);
     }
 
-    pos = modulo(hash<string>{}(string_to_hash), BIG_INT);
-
+    //pos = modulo(hash<string>{}(string_to_hash), BIG_INT);
+    pos = modulo(hash<long double>{}(sum_to_hash), BIG_INT);
     pos = modulo(pos, n / 2);
 
     // cout << "Pushing " << line << " to [" << amp_func << "][" << pos << "]" << endl;
@@ -427,6 +463,15 @@ void Euclidian_Full_Search_Range(int query_line, double radius) {
 }
 
 void Nearest_Query_Euclidian(int query_line, int L, int k, int N) {
+
+    //for (int i = 0; i < 5; i++) {
+    //    for (int j = 0; j < 25; j++) {
+    //        cout << Euclidian_Hash_Tables[i][j].size() << " ";
+    //    }
+    //    cout << endl;
+    //}
+
+
     int amp_func, pos_in_hash_table;
     long double dist;
 
@@ -458,25 +503,28 @@ void Nearest_Query_Euclidian(int query_line, int L, int k, int N) {
 
     for (amp_func = 0; amp_func < L; amp_func++) {
         pos_in_hash_table = euclidian_hash_query(query_line, amp_func, k);
-        int widen = 0;
+        int widen = 1;
         int max = Euclidian_Hash_Tables[amp_func].size()-1;
-        while (best_lsh.size() < N && widen < 25) {
-            if (pos_in_hash_table+widen < max) {
-                for (auto i = Euclidian_Hash_Tables[amp_func][pos_in_hash_table+widen].begin();
-                     i != Euclidian_Hash_Tables[amp_func][pos_in_hash_table+widen].end(); ++i) {
 
-                    dist = calcute_euclidian_distance(*i, query_line);
+        for (unsigned long long & i : Euclidian_Hash_Tables[amp_func][pos_in_hash_table]) {
+            dist = calcute_euclidian_distance(i, query_line);
+            update_best(i, dist);
+        }
 
-                    update_best(*i, dist);
-                     }
+        while (widen < 3 || (best_lsh.size() < N && widen < 13)) {
+
+            int checkIndex = (pos_in_hash_table +widen) % max;
+            for (unsigned long long & i : Euclidian_Hash_Tables[amp_func][checkIndex]) {
+                dist = calcute_euclidian_distance(i, query_line);
+                update_best(i, dist);
             }
-            if (widen==0 && pos_in_hash_table - widen > -1) {
-                for (auto i = Euclidian_Hash_Tables[amp_func][pos_in_hash_table-widen].begin();
-                 i != Euclidian_Hash_Tables[amp_func][pos_in_hash_table-widen].end(); ++i) {
-                    dist = calcute_euclidian_distance(*i, query_line);
 
-                    update_best(*i, dist);
-                 }
+
+            checkIndex = (pos_in_hash_table -widen +max ) % max;
+            for (auto i = Euclidian_Hash_Tables[amp_func][checkIndex].begin();
+             i != Euclidian_Hash_Tables[amp_func][checkIndex].end(); ++i) {
+                dist = calcute_euclidian_distance(*i, query_line);
+                update_best(*i, dist);
             }
             widen++;
         }
@@ -760,51 +808,29 @@ void Euclidian_LSH_File_With_Prints(int L, int k, int N) {
     Euclidian_Amplified_Functions = readEuclidianAmplifiedFunctions();
     w = readEuclidianW();
     points_in_range_euc = readEuclidianPointsInRangeEuc();
-    string str;
-    qFile >> str;
 
-    double radius;
     long long unsigned int queries;
 
-    if (str.compare("Radius:") == 0) {
-        qFile >> radius;
-        cout << "radius is " << radius << endl;
+    queries = get_number_of_queries();
 
-        queries = get_number_of_queries();
+    LoadQuery();
 
-        for (int q = 1; q < queries; q++) {
-            Range_Search_Euclidian(q, radius, L, k);
-        }
-    } else {
-        queries = get_number_of_queries();
-
-        for (int q = 0; q < queries; q++) {
-            Nearest_Query_Euclidian(q, L, k, N);
-        }
+    for (int q = 0; q < queries; q++) {
+        Nearest_Query_Euclidian(q, L, k, N);
     }
+
 }
 
 void Euclidian_LSH_File(int L, int k, int numOfNeighbors) {
-    string str;
-    qFile >> str;
 
-    double radius;
     long long unsigned int queries;
 
-    if (str.compare("Radius:") == 0) {
-        qFile >> radius;
-        cout << "radius is " << radius << endl;
+    queries = get_number_of_queries();
 
-        queries = get_number_of_queries();
+    LoadQuery();
 
-        for (int q = 1; q < queries; q++) {
-            Range_Search_Euclidian(q, radius, L, k);
-        }
-    } else {
-        queries = get_number_of_queries();
-
-        for (int q = 0; q < queries; q++) {
-            Nearest_Query_Euclidian(q, L, k, numOfNeighbors);
-        }
+    for (int q = 0; q < queries; q++) {
+        Nearest_Query_Euclidian(q, L, k, numOfNeighbors);
     }
+
 }
