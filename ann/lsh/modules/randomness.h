@@ -13,4 +13,6 @@
 
 using namespace std;
 
-double normal_distribution_generator(void); /* Returns a random number following normal distribution */
+double normal_distribution_generator(); /* Returns a random number following normal distribution */
+
+double uniform_distribution_generator(int w);

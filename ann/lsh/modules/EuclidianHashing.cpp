@@ -17,11 +17,13 @@ void HashTable_Euclidian_Initialization(int L) {
 void HashFunctions_Euclidian_Initialization(int k, int L) {
     /* First lets fill out the v vectors used for the euclidian hashing method */
 
+    int seed = 42;
     v.resize(k, vector<double>(dim));
     for (int i = 0; i < k; i++) {
         v[i].clear();
 
         for (int j = 0; j < dim; j++) {
+            seed += i+j;
             v[i].push_back(normal_distribution_generator());
 
             // cout << "i: " << i << " j: " << j << " is " << (double) v[i][j] << endl; /* DEBUG -
@@ -37,7 +39,7 @@ void HashFunctions_Euclidian_Initialization(int k, int L) {
 
     Euclidian_Amplified_Functions.resize(L, vector<int>(k));
 
-    srand(time(0));
+    srand(5);
 
     int func_num;
 
@@ -71,15 +73,14 @@ void HashFunctions_Euclidian_Initialization(int k, int L) {
 
     float random;
 
-    random_device generator;
-    uniform_real_distribution<float> distribution(0.0, (float) w);
-
     for (int i = 0; i < k; i++) { /* Each hash function has its own t */
-
-        random = distribution(generator); /* Generate a new double number */
+        seed += i;
+        random = uniform_distribution_generator(w);
 
         t.push_back(random);
     }
+
+
 }
 
 void Search_Euclidian_Hash_Tables(int line, int L) {
@@ -171,11 +172,16 @@ void Store_w() {
 void Store_Euclidian_Amplified_Functions() {
     std::ofstream outeaf("eaf");
     outeaf << Euclidian_Amplified_Functions.size() << '\n';
+    //cout << Euclidian_Amplified_Functions.size() << '\n';
     for (const auto& row : Euclidian_Amplified_Functions) {
         outeaf << row.size();
-        for (int x : row)
+        //cout << row.size();
+        for (int x : row) {
             outeaf << ' ' << x;
+            //cout << ' ' << x;
+        }
         outeaf << '\n';
+        //cout << '\n';
     }
 }
 
@@ -203,13 +209,19 @@ void Store_v() {
 void Store_Euclidian_Hash_Tables() {
     std::ofstream outEuclidian_Hash_Tables("Euclidian_Hash_Tables");
     outEuclidian_Hash_Tables << Euclidian_Hash_Tables.size() << '\n';
+    //cout << Euclidian_Hash_Tables.size() << '\n';
     for (const auto& v2 : Euclidian_Hash_Tables) {
         outEuclidian_Hash_Tables << v2.size() << '\n';
+        //cout << v2.size() << '\n';
         for (const auto& v3 : v2) {
             outEuclidian_Hash_Tables << v3.size();
-            for (auto value : v3)
+            //cout << v3.size();
+            for (auto value : v3) {
                 outEuclidian_Hash_Tables << ' ' << value;
+                //cout << ' ' << value;
+            }
             outEuclidian_Hash_Tables << '\n';
+            //cout << '\n';
         }
     }
 }
@@ -219,13 +231,19 @@ void Store_Euclidian_Hash_Tables_In_Series(int file_number) {
     fileName.append(to_string(file_number));
     std::ofstream outEuclidian_Hash_Tables(fileName);
     outEuclidian_Hash_Tables << Euclidian_Hash_Tables.size() << '\n';
+    //cout << Euclidian_Hash_Tables.size() << '\n';
     for (const auto& v2 : Euclidian_Hash_Tables) {
         outEuclidian_Hash_Tables << v2.size() << '\n';
+        //cout << v2.size() << '\n';
         for (const auto& v3 : v2) {
             outEuclidian_Hash_Tables << v3.size();
-            for (auto value : v3)
+            //cout << v3.size() << '\n';
+            for (auto value : v3) {
                 outEuclidian_Hash_Tables << ' ' << value;
+                //cout << ' ' << value;
+            }
             outEuclidian_Hash_Tables << '\n';
+            //cout << '\n';
         }
     }
 }
@@ -238,7 +256,7 @@ void Store_tt() {
     outt << '\n';
 }
 
-long long int calcute_euclidian_distance(int input_line, int query_line) {
+long double calcute_euclidian_distance(int input_line, int query_line) {
     /* First lets get the vectors specified in both the input and the query file */
 
     get_query(query_line);
@@ -252,7 +270,7 @@ long long int calcute_euclidian_distance(int input_line, int query_line) {
 
     double x, y;
 
-    long long int dist = 0;
+    long double dist = 0;
 
     for (int i = 0; i < dim; i++) {
         inFile >> x;
@@ -282,6 +300,18 @@ void Euclidian_Hash_Tables_Finalization(int L) {
     }
 
     Euclidian_Hash_from_file(0, L, k);
+
+    //cout << Euclidian_Hash_Tables.size() << '\n';
+    //for (const auto& v2 : Euclidian_Hash_Tables) {
+    //    cout << v2.size() << '\n';
+    //    for (const auto& v3 : v2) {
+    //        cout << v3.size();
+    //        for (auto value : v3) {
+    //            cout << ' ' << value;
+    //        }
+    //        cout << '\n';
+    //    }
+    //}
 
     Store_Euclidian_Hash_Tables();
     Store_tt();
@@ -398,13 +428,12 @@ void Euclidian_Full_Search_Range(int query_line, double radius) {
 
 void Nearest_Query_Euclidian(int query_line, int L, int k, int N) {
     int amp_func, pos_in_hash_table;
-    long long unsigned int dist;
-    short int time_to_break = 3 * L;
+    long double dist;
 
-    std::vector<std::pair<long long unsigned int, long long unsigned int>> best_lsh;
+    std::vector<std::pair<long double, long long unsigned int>> best_lsh;
     // (dist, line)
 
-    auto update_best = [&](long long unsigned int line_idx, long long unsigned int d) {
+    auto update_best = [&](long long unsigned int line_idx, long double d) {
         // 1. Skip if this line_idx is already in best_lsh (avoid duplicates)
         for (const auto& p : best_lsh) {
             if (p.second == line_idx)
@@ -432,9 +461,10 @@ void Nearest_Query_Euclidian(int query_line, int L, int k, int N) {
         int widen = 0;
         int max = Euclidian_Hash_Tables[amp_func].size()-1;
         while (best_lsh.size() < N && widen < 25) {
-            if (pos_in_hash_table + widen < max) {
+            if (pos_in_hash_table+widen < max) {
                 for (auto i = Euclidian_Hash_Tables[amp_func][pos_in_hash_table+widen].begin();
                      i != Euclidian_Hash_Tables[amp_func][pos_in_hash_table+widen].end(); ++i) {
+
                     dist = calcute_euclidian_distance(*i, query_line);
 
                     update_best(*i, dist);
@@ -454,7 +484,7 @@ void Nearest_Query_Euclidian(int query_line, int L, int k, int N) {
 
     if (best_lsh.empty()) {
         for (long long unsigned int i = 0; i < n; ++i) {
-            long long unsigned int d = calcute_euclidian_distance(i, query_line);
+            long double d = calcute_euclidian_distance(i, query_line);
             update_best(i, d);  // reuse same top-N logic
         }
     }
@@ -482,6 +512,7 @@ void Nearest_Query_Euclidian(int query_line, int L, int k, int N) {
 
 void Range_Search_Euclidian(int query_line, double range, int L, int k) {
     /* Given a query line, performs LSH range search */
+
 
     short int already_in;
 
@@ -753,7 +784,7 @@ void Euclidian_LSH_File_With_Prints(int L, int k, int N) {
     }
 }
 
-void Euclidian_LSH_File(int L, int k, int N) {
+void Euclidian_LSH_File(int L, int k, int numOfNeighbors) {
     string str;
     qFile >> str;
 
@@ -773,7 +804,7 @@ void Euclidian_LSH_File(int L, int k, int N) {
         queries = get_number_of_queries();
 
         for (int q = 0; q < queries; q++) {
-            Nearest_Query_Euclidian(q, L, k, N);
+            Nearest_Query_Euclidian(q, L, k, numOfNeighbors);
         }
     }
 }

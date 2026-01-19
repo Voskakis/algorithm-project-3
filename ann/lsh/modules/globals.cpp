@@ -1,4 +1,5 @@
 #include <fstream>
+#include <random>
 
 std::ifstream inFile;  /* Input File */
 std::ifstream qFile;   /* Query File */

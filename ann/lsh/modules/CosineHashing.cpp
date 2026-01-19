@@ -29,11 +29,11 @@ void HashFunctions_Cosine_Initialization(int L,int k){
 	cout << "I just resized the Hash Functions with size: " << k << " x " << dimension << endl;
 
 	/* Initializing the ri vectors used for the cosine similarity */
-
+    int seed = 42;
 	for(int i=0;i<k;i++){
 
 		for(int j=0;j < dimension;j++){
-
+		    seed += j+i;
 			Hash_Function[i][dimension] = normal_distribution_generator();
 
 			// cout << "i: " << i << " j: " << j << " is " << (double) Hash_Function[i][j] << endl; /* DEBUG - Printing out elements of Hash_Function */

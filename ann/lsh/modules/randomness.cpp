@@ -1,16 +1,16 @@
 #include "randomness.h"
+std::mt19937 gen(42);
 
-double normal_distribution_generator(void){
+double normal_distribution_generator(){
+        //static std::mt19937 gen(seed);          // seeded once per execution
+        static std::normal_distribution<double> d(0.0, 1.0);
 
-	/* Based on https://en.cppreference.com/w/cpp/numeric/random/normal_distribution */
+        return std::round(d(gen));
+    }
 
-	random_device rd{};
-    mt19937 gen{rd()};
+double uniform_distribution_generator(int w){
+    //static std::mt19937 gen(seed);          // seeded once per execution
+    uniform_real_distribution<float> d(0.0, (float) w);
 
-	normal_distribution<float> d{0,1};
-
-	map<int, int> hist{};
-
-	return round(d(gen));
-
+    return std::round(d(gen));
 }
