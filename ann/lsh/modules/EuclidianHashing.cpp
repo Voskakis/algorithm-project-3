@@ -31,7 +31,7 @@ void HashFunctions_Euclidian_Initialization(int k, int L) {
 
     /* Now lets initialize the w which will be used */
 
-    w = 5;
+    w = 2;
 
     /* Initialize Amplified_Euclidian_Functions */
 
@@ -156,30 +156,6 @@ void Euclidian_Hash_from_file(int line, int L, int k) {
     }
 }
 
-void Euclidian_Hash_Tables_Finalization(int L) {
-    int max = n / 2;
-
-    for (int amp_func = 0; amp_func < L; amp_func++) {
-        for (int pos = 0; pos < max; pos++) {
-            Euclidian_Hash_Tables[amp_func][pos].erase(
-                    remove(Euclidian_Hash_Tables[amp_func][pos].begin(),
-                           Euclidian_Hash_Tables[amp_func][pos].end(), 0),
-                    Euclidian_Hash_Tables[amp_func][pos].end());
-        }
-    }
-
-    Euclidian_Hash_from_file(0, L, k);
-
-    Store_Euclidian_Hash_Tables();
-    Store_tt();
-    Store_v();
-    Store_n();
-    Store_dim();
-    Store_Euclidian_Amplified_Functions();
-    Store_w();
-    Store_points_in_range_euc();
-}
-
 void Store_points_in_range_euc() {
     std::ofstream outpoints("points_in_range_euc");
     outpoints << points_in_range_euc.size() << '\n';
@@ -238,6 +214,22 @@ void Store_Euclidian_Hash_Tables() {
     }
 }
 
+void Store_Euclidian_Hash_Tables_In_Series(int file_number) {
+    string fileName = "Euclidian_Hash_Tables_";
+    fileName.append(to_string(file_number));
+    std::ofstream outEuclidian_Hash_Tables(fileName);
+    outEuclidian_Hash_Tables << Euclidian_Hash_Tables.size() << '\n';
+    for (const auto& v2 : Euclidian_Hash_Tables) {
+        outEuclidian_Hash_Tables << v2.size() << '\n';
+        for (const auto& v3 : v2) {
+            outEuclidian_Hash_Tables << v3.size();
+            for (auto value : v3)
+                outEuclidian_Hash_Tables << ' ' << value;
+            outEuclidian_Hash_Tables << '\n';
+        }
+    }
+}
+
 void Store_tt() {
     std::ofstream outt("t");
     outt << t.size() << '\n';
@@ -275,6 +267,30 @@ long long int calcute_euclidian_distance(int input_line, int query_line) {
     // cout << "DIST: " << dist << endl;
 
     return dist;
+}
+
+void Euclidian_Hash_Tables_Finalization(int L) {
+    int max = n / 2;
+
+    for (int amp_func = 0; amp_func < L; amp_func++) {
+        for (int pos = 0; pos < max; pos++) {
+            Euclidian_Hash_Tables[amp_func][pos].erase(
+                    remove(Euclidian_Hash_Tables[amp_func][pos].begin(),
+                           Euclidian_Hash_Tables[amp_func][pos].end(), 0),
+                    Euclidian_Hash_Tables[amp_func][pos].end());
+        }
+    }
+
+    Euclidian_Hash_from_file(0, L, k);
+
+    Store_Euclidian_Hash_Tables();
+    Store_tt();
+    Store_v();
+    Store_n();
+    Store_dim();
+    Store_Euclidian_Amplified_Functions();
+    Store_w();
+    Store_points_in_range_euc();
 }
 
 long long unsigned int euclidian_hash_query(int query_line, int amp_func, int k) {
@@ -413,19 +429,27 @@ void Nearest_Query_Euclidian(int query_line, int L, int k, int N) {
 
     for (amp_func = 0; amp_func < L; amp_func++) {
         pos_in_hash_table = euclidian_hash_query(query_line, amp_func, k);
+        int widen = 0;
+        int max = Euclidian_Hash_Tables[amp_func].size()-1;
+        while (best_lsh.size() < N && widen < 25) {
+            if (pos_in_hash_table + widen < max) {
+                for (auto i = Euclidian_Hash_Tables[amp_func][pos_in_hash_table+widen].begin();
+                     i != Euclidian_Hash_Tables[amp_func][pos_in_hash_table+widen].end(); ++i) {
+                    dist = calcute_euclidian_distance(*i, query_line);
 
-        for (auto i = Euclidian_Hash_Tables[amp_func][pos_in_hash_table].begin();
-             i != Euclidian_Hash_Tables[amp_func][pos_in_hash_table].end(); ++i) {
-            dist = calcute_euclidian_distance(*i, query_line);
+                    update_best(*i, dist);
+                     }
+            }
+            if (widen==0 && pos_in_hash_table - widen > -1) {
+                for (auto i = Euclidian_Hash_Tables[amp_func][pos_in_hash_table-widen].begin();
+                 i != Euclidian_Hash_Tables[amp_func][pos_in_hash_table-widen].end(); ++i) {
+                    dist = calcute_euclidian_distance(*i, query_line);
 
-            update_best(*i, dist);
-
-            // time_to_break--;
-            if (time_to_break <= 0)
-                break;
+                    update_best(*i, dist);
+                 }
+            }
+            widen++;
         }
-
-        time_to_break = 3 * L;
     }
 
     if (best_lsh.empty()) {
@@ -555,6 +579,60 @@ Vec3 readEuclidianHashTables() {
     }
 
     return tables;
+}
+
+
+void testRead() {
+    std::ifstream in("Euclidian_Hash_Tables");
+    string output;
+    while (!in.eof()) {
+        in >> output;
+        cout << output << endl;
+    }
+}
+
+void readEuclidianHashTablesInSeries(int number_of_files) {
+    Vec3 outer_tables;
+    for (int t = 0; t <= number_of_files; t++) {
+        Vec3 tables;
+        string fileName = "Euclidian_Hash_Tables_";
+        fileName.append(to_string(t));
+        std::ifstream in(fileName);
+        size_t outerSize;
+        if (!(in >> outerSize))
+            throw std::runtime_error("Failed to read outer size");
+
+        tables.resize(outerSize);
+
+        for (size_t i = 0; i < outerSize; ++i) {
+            size_t midSize;
+            in >> midSize;
+            tables[i].resize(midSize);
+
+            for (size_t j = 0; j < midSize; ++j) {
+                size_t innerSize;
+                in >> innerSize;
+                tables[i][j].resize(innerSize);
+
+                for (size_t k = 0; k < innerSize; ++k)
+                    in >> tables[i][j][k];
+            }
+        }
+
+        if (t==0) {
+            outer_tables = tables;
+        }
+        else {
+            for (size_t i = 0; i < tables.size(); ++i) {
+                for (size_t j = 0; j < tables[i].size(); ++j) {
+                    outer_tables[i][j].resize(tables[i][j].size()+outer_tables[i][j].size());
+                    for (size_t k = 0; k < tables[i][j].size(); ++k)
+                        outer_tables[i][j][k] = tables[i][j][k];
+                }
+            }
+        }
+    }
+    Euclidian_Hash_Tables = outer_tables;
 }
 
 std::vector<double> readEuclidianT() {

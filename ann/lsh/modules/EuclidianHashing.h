@@ -60,3 +60,9 @@ void Nearest_Query_Euclidian(int query_line,int L,int k); /* Given a query line,
 void Euclidian_Full_Search_Range(int query_line,double radius); /* Brute Force Range Search using Euclidian metric */
 
 void Range_Search_Euclidian(int query_line,long long unsigned int range,int L,int k); /* Given a query line, performs LSH range search */
+
+void readEuclidianHashTablesInSeries(int number_of_files);
+
+void Store_Euclidian_Hash_Tables_In_Series(int file_number);
+
+void testRead();

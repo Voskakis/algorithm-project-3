@@ -23,10 +23,21 @@ int main(int argc, char* argv[]) {
             HashFunctions_Euclidian_Initialization(k, L);
 
             // FIRST insert all dataset vectors
+            int fileCount = 0;
+            int split = floor(lines/10);
             for (int i = 0; i < lines; i++){
                 Euclidian_Hash_from_file(i, L, k);
                 cout << "Inserting line " << i << endl;
+                //if (i>(1+fileCount)*split) {
+                //    Store_Euclidian_Hash_Tables_In_Series(fileCount);
+                //    cout << "Storing up to line " << i << endl;
+                //    std::vector<std::vector<std::vector<unsigned long long>>>().swap(Euclidian_Hash_Tables);
+                //    fileCount++;
+                //}
             }
+            cout << "Reassembling hash table." << endl;
+            //testRead();
+            //readEuclidianHashTablesInSeries(fileCount);
 
             // THEN finalize cleanup (removes zeros)
             Euclidian_Hash_Tables_Finalization(L);
