@@ -813,6 +813,7 @@ void Euclidian_LSH_File_With_Prints(int L, int k, int N) {
 
     queries = get_number_of_queries();
 
+    LoadDataset();
     LoadQuery();
 
     for (int q = 0; q < queries; q++) {

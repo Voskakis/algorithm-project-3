@@ -4,6 +4,8 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
     int input = user_input_handling(argc, argv);
     if (input == -1) {
         cout << "The program will now exit." << endl;
@@ -27,7 +29,7 @@ int main(int argc, char* argv[]) {
             int split = floor(lines/10);
             for (int i = 0; i < lines; i++){
                 Euclidian_Hash_from_file(i, L, k);
-                cout << "Inserting line " << i << endl;
+                //cout << "Inserting line " << i << endl;
                 //if (i>(1+fileCount)*split) {
                 //    Store_Euclidian_Hash_Tables_In_Series(fileCount);
                 //    cout << "Storing up to line " << i << endl;
@@ -35,14 +37,17 @@ int main(int argc, char* argv[]) {
                 //    fileCount++;
                 //}
             }
-            cout << "Reassembling hash table." << endl;
+            //cout << "Reassembling hash table." << endl;
             //testRead();
             //readEuclidianHashTablesInSeries(fileCount);
 
             // THEN finalize cleanup (removes zeros)
             Euclidian_Hash_Tables_Finalization(L);
-            cout << "Finalized Hash Tables" << endl;
+            //cout << "Finalized Hash Tables" << endl;
             Euclidian_LSH_File(L, k, N);
+
+            std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+            cerr << "Time elapsed: " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "[s]" << std::endl;
         }
 
         // ========================
