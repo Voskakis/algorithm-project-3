@@ -5,7 +5,7 @@ from ann.neural.build_pipeline import MLPClassifier, load_inverted_file
 import torch
 import torch.nn.functional as F
 from torch.utils.data import TensorDataset
-from build_pipeline import run_kahip, build_graph_items, create_inverted_file
+from ann.neural.build_pipeline import run_kahip, build_graph_items, create_inverted_file
 
 model = MLPClassifier
 inverted_file = list
