@@ -1,10 +1,10 @@
 #include "modules/CosineHashing.h"
 #include "modules/EuclidianHashing.h"
 #include "modules/UserInputHandling.h"
+#include "modules/globals.cpp"
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
     int input = user_input_handling(argc, argv);
     if (input == -1) {
@@ -47,8 +47,6 @@ int main(int argc, char* argv[]) {
             //cout << "Finalized Hash Tables" << endl;
             Euclidian_LSH_File(L, k, N);
 
-            std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-            cerr << "Time elapsed: " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "[s]" << std::endl;
             freeResources();
         }
 

@@ -1,8 +1,13 @@
 import argparse
+import os
+
+os.environ["PATH"]=r"C:\Users\User\mingw64\bin;" + os.environ["PATH"]
+
 import sys
 import tempfile
 import time
 import subprocess
+from pathlib import Path
 
 from numpy.f2py.auxfuncs import throw_error
 
@@ -77,16 +82,23 @@ def main():
     #Handle BLAST work
 
     start = time.time()
-    results_by_BLAST(args.database, args.query, "blast_results.tsv")
+    #results_by_BLAST(args.fasta, args.query, "blast_results.tsv")
     end = time.time()
     BLAST_time = (end - start)/len(args.query)
     BLAST_results = load_BLAST_results(int(args.number), "blast_results.tsv")
 
     query_data_parsed = []
     argv_holder = sys.argv
-    sys.argv = ["protein_embed.py",'-i', 'search_input.query_file', '-o', 'query_vectors.dat']
+    sys.argv = ["protein_embed.py",'-i', args.query, '-o', 'query_vectors.dat']
     protein_embed.main()
     sys.argv = argv_holder
+
+    protein_names = []
+    with open(args.fasta, 'r') as fasta:
+        for line in fasta:
+            if line[0] == ">":
+                protein_names.append(line[1:].split()[0])
+
     with open('query_vectors.dat', "r") as q_vecs:
         for line in q_vecs:
             elements = line.split('\t')
@@ -94,9 +106,11 @@ def main():
 
     database_parsed = []
     with open(args.database, 'r') as database:
+        datumIndexCount = 0
         for datum in database:
-            elements = datum.split('\t')
-            database_parsed.append((elements[0], elements[1:]))
+            elements = datum.split(' ')
+            database_parsed.append((protein_names[datumIndexCount], elements))
+            datumIndexCount+=1
 
 
     for q, index in zip(query_data_parsed, range(len(args.query))):
@@ -123,19 +137,27 @@ def main():
 
             elif mode== "Euclidean LSH":
                 result = ""
-                with tempfile.NamedTemporaryFile() as tmp:
-                    tmp.write("\t".join(query_vector))
-                    result = subprocess.check_output( #output format is "num_id num_id num_id ..."
-                        ["./lsh", "-d", "LSH_index.dat", "-q", f"./{tmp.name}",
-                         "-N", f"{args.number}", "-o", "output.txt"]
+                with open("query_vector_holder.txt", 'w') as tmp:
+                    tmpString = "\t".join(query_vector)
+                    tmp.write(tmpString)
+                    QUERY_FULL_NAME = os.path.abspath(tmp.name)
+                    ROOT = Path(__file__).resolve().parents[1]
+                    LSH_EXEC = ROOT / "ann" / "lsh" / "lsh.exe"
+                    DATASET_FULL_NAME = ROOT / args.database
+
+                    tmp.close()
+
+                    result = subprocess.run( #output format is "num_id num_id num_id ..."
+                        [str(LSH_EXEC), "-d", str(DATASET_FULL_NAME), "-q", QUERY_FULL_NAME,
+                         "-N", f"{args.number}", "-o", "none"], capture_output=True, text=True, shell=True
                     )
-                if result=="":
-                    throw_error("protein_search, line 135ish, 'with' scope issue")
-                temp_results = []
-                for r in result.split(' '):
-                    result_index = int(r)
-                    temp_results.append(database_parsed[result_index])
-                method_results.append(temp_results)
+                    if result=="":
+                        throw_error("protein_search, line 135ish, 'with' scope issue")
+                    temp_results = []
+                    for r in result.stdout.split(' '):
+                        result_index = int(r)
+                        temp_results.append(database_parsed[result_index])
+                    method_results.append(temp_results)
 
             #method_results must be of form [(2, [2,2,2,2]),...]
             end = time.time()
@@ -149,7 +171,7 @@ def main():
             bid = []
             distance = []
             temp_method_results = []
-            for protein in method_results:
+            for protein in method_results[-1]:
                 temp_bid = blast_identity_by_fasta_id(args.fasta, query_vector, protein[0])
                 if temp_bid < 0.3:
                     bid.append(temp_bid)

@@ -10,7 +10,12 @@ def results_by_BLAST(input_data, query_file, results_directory):
                    +" -outfmt \"6 qseqid sseqid pident evalue bitscore\" -out "
                    + results_directory)
 
-    subprocess.run(command, shell=True, capture_output=True, text=True)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+
+    if result.returncode != 0:
+        print("BLAST failed!")
+        print("STDERR:", result.stderr)
+        raise RuntimeError("BLAST command failed")
 
 def load_BLAST_results(k: int, results_directory: str, threshold: float= 0.01):
     data = defaultdict(list)
