@@ -14,6 +14,7 @@ int main(int argc, char* argv[]) {
 
     if (input != 1) {
         Euclidian_LSH_File_With_Prints(L, k, N);
+        freeResources();
     } else {
         long long unsigned int lines = get_number_of_lines();
 
@@ -48,6 +49,7 @@ int main(int argc, char* argv[]) {
 
             std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
             cerr << "Time elapsed: " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "[s]" << std::endl;
+            freeResources();
         }
 
         // ========================

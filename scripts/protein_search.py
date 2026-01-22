@@ -6,7 +6,7 @@ import subprocess
 
 from numpy.f2py.auxfuncs import throw_error
 
-from ann.neural import initialize_nlsh, search_nlsh, euclidean
+# from ann.neural import initialize_nlsh, search_nlsh, euclidean
 from blast.blast_results import results_by_BLAST, load_BLAST_results
 from blast.blast_compare import blast_identity_by_fasta_id
 from scripts import protein_embed
@@ -51,8 +51,8 @@ def main():
     parser.add_argument("-n", "--number", required=True, help="Count of results to retrieve")
     args = parser.parse_args()
 
-    if args.method == "all" or args.method == "neural":
-        initialize_nlsh(args.database)
+    #if args.method == "all" or args.method == "neural":
+    #    initialize_nlsh(args.database)
 
 
 
@@ -80,7 +80,7 @@ def main():
     results_by_BLAST(args.database, args.query, "blast_results.tsv")
     end = time.time()
     BLAST_time = (end - start)/len(args.query)
-    BLAST_results = load_BLAST_results(args.number, "blast_results.tsv")
+    BLAST_results = load_BLAST_results(int(args.number), "blast_results.tsv")
 
     query_data_parsed = []
     argv_holder = sys.argv
@@ -115,7 +115,7 @@ def main():
             if mode== "BLAST":
                 continue
             elif mode== "Neural LSH":
-                result = search_nlsh(query_vector, args.number),     #this one's output is of the format [num_id, num_id,...]
+                #result = search_nlsh(query_vector, args.number),     #this one's output is of the format [num_id, num_id,...]
                 temp_results = []
                 for r in result:
                     temp_results.append(database_parsed[r])
@@ -124,7 +124,7 @@ def main():
             elif mode== "Euclidean LSH":
                 result = ""
                 with tempfile.NamedTemporaryFile() as tmp:
-                    tmp.write(query_vector)
+                    tmp.write("\t".join(query_vector))
                     result = subprocess.check_output( #output format is "num_id num_id num_id ..."
                         ["./lsh", "-d", "LSH_index.dat", "-q", f"./{tmp.name}",
                          "-N", f"{args.number}", "-o", "output.txt"]
@@ -154,7 +154,7 @@ def main():
                 if temp_bid < 0.3:
                     bid.append(temp_bid)
                     temp_method_results.append(protein[0])
-                    distance.append(euclidean(protein[1], query_vector))
+                    #distance.append(euclidean(protein[1], query_vector))
                     if protein[0] not in temp_blast_results:
                         included.append("No")
                     else:

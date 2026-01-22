@@ -5,7 +5,7 @@ from collections import defaultdict
 def results_by_BLAST(input_data, query_file, results_directory):
     command = ("makeblastdb -in "
                    + input_data
-                   +" -dbtype prot -out swissprot_db\nblastp -db swissprot_db -query "
+                   +" -dbtype prot -out swissprot_db && blastp -db swissprot_db -query "
                    + query_file
                    +" -outfmt \"6 qseqid sseqid pident evalue bitscore\" -out "
                    + results_directory)

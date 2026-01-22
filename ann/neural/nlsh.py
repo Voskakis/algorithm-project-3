@@ -5,7 +5,7 @@ from ann.neural.build_pipeline import MLPClassifier, load_inverted_file
 import torch
 import torch.nn.functional as F
 from torch.utils.data import TensorDataset
-from build_pipeline import run_kahip, build_graph_items, create_inverted_file
+from ann.neural.build_pipeline import run_kahip, build_graph_items, create_inverted_file
 
 model = MLPClassifier
 inverted_file = list
@@ -90,7 +90,7 @@ def build_modular_nlsh():
     learn_rate = constants[9]
     resultFile = open("lsh.output.txt", 'r')
     result = resultFile.readlines()
-    knn = [list(map(int, line.split())) for line in result]
+    knn = [list(map(int, line.split()[1:])) for line in result] #skip the first result, it's the self
     for i in knn:
         del i[0]
     adj_set, xadj, vwgt, adjcwgt, adjncy = build_graph_items(knn)

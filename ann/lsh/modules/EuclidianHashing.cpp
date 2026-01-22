@@ -835,3 +835,13 @@ void Euclidian_LSH_File(int L, int k, int numOfNeighbors) {
     }
 
 }
+
+void freeResources() {
+    dataset.clear();
+    queryset.clear();
+    Euclidian_Amplified_Functions.clear();
+    Euclidian_Hash_Tables.clear();
+    inFile.close();
+    qFile.close();
+    outFile.close();
+}

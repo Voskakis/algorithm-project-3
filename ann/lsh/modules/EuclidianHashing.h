@@ -66,3 +66,5 @@ void readEuclidianHashTablesInSeries(int number_of_files);
 void Store_Euclidian_Hash_Tables_In_Series(int file_number);
 
 void testRead();
+
+void freeResources();
