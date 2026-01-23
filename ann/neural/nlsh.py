@@ -10,7 +10,7 @@ from ann.neural.build_pipeline import run_kahip, build_graph_items, create_inver
 model = MLPClassifier
 inverted_file = list
 input_data = list
-constants = ["./data/lsh.output.txt", 100, 3, 64, 5, 0.03, 1, 10, 128, 0.001]
+constants = ["./model_parameters", 100, 3, 64, 5, 0.03, 1, 10, 128, 0.001]
 
 def euclidean(vector1, vector2):
     total = 0

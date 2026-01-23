@@ -542,10 +542,14 @@ void Nearest_Query_Euclidian(int query_line, int L, int k, int N) {
 
     for (size_t rank = 0; rank < best_lsh.size(); ++rank) {
         std::cout << best_lsh[rank].second;
-        if (rank + 1 < best_lsh.size())
+        outFile << best_lsh[rank].second;
+        if (rank + 1 < best_lsh.size()) {
             std::cout << " ";
+            outFile << " ";
+        }
     }
     std::cout << "\n";
+    outFile << "\n";
     // auto start2 = std::chrono::high_resolution_clock::now();
 
     // Euclidian_Full_Search_NN(query_line, N);
