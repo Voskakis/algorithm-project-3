@@ -1,5 +1,6 @@
 import math
 from pathlib import Path
+import numpy as np
 
 from ann.neural.build_pipeline import MLPClassifier, load_inverted_file
 import torch
@@ -7,10 +8,10 @@ import torch.nn.functional as F
 from torch.utils.data import TensorDataset
 from ann.neural.build_pipeline import run_kahip, build_graph_items, create_inverted_file
 
-model = MLPClassifier
-inverted_file = list
-input_data = list
-constants = ["./data/lsh.output.txt", 100, 3, 64, 5, 0.03, 1, 10, 128, 0.001]
+model : MLPClassifier
+inverted_file : list
+input_data : list = []
+constants = ["./model_parameters", 100, 3, 64, 5, 0.03, 1, 10, 128, 0.001]
 
 def euclidean(vector1, vector2):
     total = 0
@@ -19,7 +20,7 @@ def euclidean(vector1, vector2):
     return math.sqrt(total)
 
 def add_better_result_modular(point, q, result_list, N):
-    distance = euclidean(point[1], q)
+    distance = euclidean(point[0], q)
     if len(result_list) < N:
         result_list.append([point, distance])
     elif distance < result_list[0][1]:
@@ -30,7 +31,7 @@ def add_better_result_modular(point, q, result_list, N):
     return result_list
 
 
-def exhaustive_search_modular(point_set: list[tuple[int, list[int]]], q:list[int], N:int) -> list[tuple[int, list[int]]]:
+def exhaustive_search_modular(point_set: list[tuple[list[int], int]], q:list[int], N:int) -> list[tuple[int, list[int]]]:
     result_list = []
     for point in point_set:
         result_list = add_better_result_modular(point, q, result_list, N)
@@ -52,7 +53,8 @@ def initialize_nlsh(_input):
     model.load_state_dict(torch.load(index_path.name + "/model.pt"))
     model.eval()
     inverted_file = load_inverted_file(index_path.name + "/inverted_file.txt")
-    input_data = _input
+    with open(_input) as f:
+        input_data = [[float(x) for x in line.split()] for line in f if line.strip()]
 
 
 def search_nlsh(q, num):
@@ -69,16 +71,16 @@ def search_nlsh(q, num):
     top_k_probs, top_k_labels = torch.topk(probs, bins_check, 1)
     # candidates
     search_space = []
-    print(top_k_labels)
     for label_tensor in top_k_labels[0]:
         label = label_tensor.item()
         for pointID in inverted_file[label]:
-            search_space.append((input_data[pointID], pointID))
+          print((input_data[pointID], pointID))
+          search_space.append((input_data[pointID], pointID))
     # exhaustive search
     return exhaustive_search_modular(search_space, q, num)
 
 
-def build_modular_nlsh():
+def build_modular_nlsh(_input):
     index_path = Path(constants[0])
     members = constants[1]
     layers = constants[2]
@@ -88,6 +90,9 @@ def build_modular_nlsh():
     epochs = constants[7]
     batch_size = constants[8]
     learn_rate = constants[9]
+    global input_data
+    with open(_input) as f:
+      input_data = [[float(x) for x in line.split()] for line in f if line.strip()]
     resultFile = open("lsh.output.txt", 'r')
     result = resultFile.readlines()
     knn = [list(map(int, line.split()[1:])) for line in result] #skip the first result, it's the self
