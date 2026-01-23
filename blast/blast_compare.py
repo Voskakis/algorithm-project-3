@@ -1,3 +1,4 @@
+import os
 import subprocess
 import tempfile
 import textwrap
@@ -28,8 +29,8 @@ def blast_identity_by_fasta_id(
         # Run BLAST in forced pairwise mode
         cmd = [
             blast_exe,
-            "-query", qf.name,
-            "-subject", sf.name,
+            "-query", os.path.abspath(qf.name),
+            "-subject", os.path.abspath(sf.name),
             "-outfmt", "6 pident",
             "-max_hsps", "1"
         ]

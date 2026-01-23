@@ -93,6 +93,14 @@ def main():
     protein_embed.main()
     sys.argv = argv_holder
 
+    query_sequences = []
+    with open(args.query, 'r') as fasta:
+        for line in fasta:
+            if line[0] == ">":
+                query_sequences.append("")
+            else:
+                query_sequences[-1]+=line[:len(line)-1]
+
     protein_names = []
     with open(args.fasta, 'r') as fasta:
         for line in fasta:
@@ -113,7 +121,7 @@ def main():
             datumIndexCount+=1
 
 
-    for q, index in zip(query_data_parsed, range(len(args.query))):
+    for q, query_sequence, index in zip(query_data_parsed, query_sequences, range(len(args.query))):
         query_vector  = q[1]
         query_name    = q[0]
 
@@ -172,7 +180,7 @@ def main():
             distance = []
             temp_method_results = []
             for protein in method_results[-1]:
-                temp_bid = blast_identity_by_fasta_id(args.fasta, query_vector, protein[0])
+                temp_bid = blast_identity_by_fasta_id(args.fasta, query_sequence, protein[0])
                 if temp_bid < 0.3:
                     bid.append(temp_bid)
                     temp_method_results.append(protein[0])
