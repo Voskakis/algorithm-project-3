@@ -1,8 +1,5 @@
 import argparse
 import os
-
-os.environ["PATH"]=r"C:\Users\User\mingw64\bin;" + os.environ["PATH"]
-
 import sys
 import tempfile
 import time
@@ -11,7 +8,7 @@ from pathlib import Path
 
 from numpy.f2py.auxfuncs import throw_error
 
-# from ann.neural import initialize_nlsh, search_nlsh, euclidean
+from ann.neural import initialize_nlsh, search_nlsh, euclidean, build_modular_nlsh
 from blast.blast_results import results_by_BLAST, load_BLAST_results
 from blast.blast_compare import blast_identity_by_fasta_id
 from scripts import protein_embed
@@ -36,11 +33,11 @@ def format_output(protein_ID: str, TopN: int, methods: list[str], BLAST_time: fl
         else:
             output += bodyPiece1.format(mthd=method, tqs=method_time[index-1], qps=1 / method_time[index-1], RN=method_rec[index-1])
     output += "-----------------------------------------------------------------------------------\n\n\n"
-    for method, index in zip(methods, range(1, len(methods)+1)):
+    for method, index in zip(methods, range(1, len(methods))):
         output += header2.format(mthd=method)
         for protein, index2 in zip(method_results[index], range(len(method_results[index]))):
-            output += bodyPiece2.format(rank=index2+1, nid=protein, l2d= method_distance[index][index2],
-                                        Bid= method_bid[index][index2], inBlast = method_included)
+            output += bodyPiece2.format(rank=index2+1, nid=protein, l2d= method_distance[index - 1][index2],
+                                        Bid= method_bid[index - 1][index2], inBlast = method_included[index -1 ][index2])
 
         output += "\n\n"
 
@@ -109,7 +106,7 @@ def main():
 
     with open('query_vectors.dat', "r") as q_vecs:
         for line in q_vecs:
-            elements = line.split('\t')
+            elements = line.split(' ')
             query_data_parsed.append((elements[0], elements[1:]))
 
     database_parsed = []
@@ -137,7 +134,7 @@ def main():
             if mode== "BLAST":
                 continue
             elif mode== "Neural LSH":
-                #result = search_nlsh(query_vector, args.number),     #this one's output is of the format [num_id, num_id,...]
+                result = search_nlsh(list(map(float, query_vector)), args.number),     #this one's output is of the format [num_id, num_id,...]
                 temp_results = []
                 for r in result:
                     temp_results.append(database_parsed[r])
@@ -148,16 +145,14 @@ def main():
                 with open("query_vector_holder.txt", 'w') as tmp:
                     tmpString = "\t".join(query_vector)
                     tmp.write(tmpString)
-                    QUERY_FULL_NAME = os.path.abspath(tmp.name)
-                    ROOT = Path(__file__).resolve().parents[1]
-                    LSH_EXEC = ROOT / "ann" / "lsh" / "lsh.exe"
-                    DATASET_FULL_NAME = ROOT / args.database
+                    QUERY_FULL_NAME = tmp.name
+                    LSH_EXEC = "./ann/lsh/lsh.exe"
+                    DATASET_FULL_NAME = args.database
 
                     tmp.close()
-
                     result = subprocess.run( #output format is "num_id num_id num_id ..."
-                        [str(LSH_EXEC), "-d", str(DATASET_FULL_NAME), "-q", QUERY_FULL_NAME,
-                         "-N", f"{args.number}", "-o", "none"], capture_output=True, text=True, shell=True
+                        ' '.join([LSH_EXEC, "-d", DATASET_FULL_NAME, "-q", QUERY_FULL_NAME,
+                         "-N", f"{args.number}", "-o", "none"]), capture_output=True, text=True, shell=True
                     )
                     if result=="":
                         throw_error("protein_search, line 135ish, 'with' scope issue")
@@ -181,16 +176,16 @@ def main():
             temp_method_results = []
             for protein in method_results[-1]:
                 temp_bid = blast_identity_by_fasta_id(args.fasta, query_sequence, protein[0])
-                if temp_bid < 0.3:
+                if temp_bid and temp_bid < 30:
                     bid.append(temp_bid)
                     temp_method_results.append(protein[0])
-                    #distance.append(euclidean(protein[1], query_vector))
-                    if protein[0] not in temp_blast_results:
+                    distance.append(euclidean(list(map(float, protein[1])), list(map(float, query_vector))))
+                    if not any(t[0] == protein[0] for t in temp_blast_results):
                         included.append("No")
                     else:
                         included.append("Yes")
 
-            method_results = temp_method_results
+            method_results.append(temp_method_results)
             method_included.append(included)
             method_bid.append(bid)
             method_distance.append(distance)
