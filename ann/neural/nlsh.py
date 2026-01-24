@@ -95,9 +95,8 @@ def build_modular_nlsh(_input):
       input_data = [[float(x) for x in line.split()] for line in f if line.strip()]
     resultFile = open("lsh.output.txt", 'r')
     result = resultFile.readlines()
-    knn = [list(map(int, line.split()[1:])) for line in result] #skip the first result, it's the self
-    for i in knn:
-        del i[0]
+    knn = [list(map(int, line.split())) for line in result]
+
     adj_set, xadj, vwgt, adjcwgt, adjncy = build_graph_items(knn)
 
     blocks, edgecut = run_kahip(vwgt, xadj, adjcwgt, adjncy, members, imbalance,
