@@ -18,7 +18,7 @@ def blast_identity_by_fasta_id(
             subject_seq = str(record.seq)
             break
     if subject_seq == "":
-        raise ValueError(f"Missing FASTA entry: subject_id")
+        raise ValueError(f"Missing FASTA entry: {subject_id}")
     # Write temporary FASTA files
     with open("blastp_qf", 'w') as qf, open("blastp_sf", 'w') as sf:
         qf.write(">query\n" + textwrap.fill(query_seq, 60) + "\n")

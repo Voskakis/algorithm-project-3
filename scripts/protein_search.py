@@ -137,8 +137,8 @@ def main():
                 result = search_nlsh(list(map(float, query_vector)), args.number),     #this one's output is of the format [num_id, num_id,...]
                 temp_results = []
                 for r in result:
-                    temp_results.append(database_parsed[r])
-                method_results.append(temp_results)
+                    temp_results.append(database_parsed)
+                method_results= temp_results
 
             elif mode== "Euclidean LSH":
                 result = ""
