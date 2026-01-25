@@ -8,7 +8,7 @@ from pathlib import Path
 
 from numpy.f2py.auxfuncs import throw_error
 
-from ann.neural import initialize_nlsh, search_nlsh, euclidean, build_modular_nlsh
+from ann.neural import initialize_nlsh, search_nlsh, euclidean
 from blast.blast_results import results_by_BLAST, load_BLAST_results
 from blast.blast_compare import blast_identity_by_fasta_id
 from scripts import protein_embed
@@ -53,8 +53,8 @@ def main():
     parser.add_argument("-n", "--number", required=True, help="Count of results to retrieve")
     args = parser.parse_args()
 
-    #if args.method == "all" or args.method == "neural":
-    #    initialize_nlsh(args.database)
+    if args.method == "all" or args.method == "neural":
+       initialize_nlsh(args.database)
 
 
 

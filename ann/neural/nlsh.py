@@ -11,6 +11,7 @@ from ann.neural.build_pipeline import run_kahip, build_graph_items, create_inver
 model : MLPClassifier
 inverted_file : list
 input_data : list = []
+device: object
 constants = ["./model_parameters", 100, 3, 64, 5, 0.03, 1, 10, 128, 0.001]
 
 def euclidean(vector1, vector2):
@@ -21,11 +22,11 @@ def euclidean(vector1, vector2):
 
 def add_better_result_modular(point, q, result_list, N):
     distance = euclidean(point[0], q)
-    if len(result_list) < N:
+    if len(result_list) < int(N):
         result_list.append([point, distance])
     elif distance < result_list[0][1]:
         result_list[0] = [point, distance]
-    if len(result_list) >= N > 1:
+    if len(result_list) >= int(N) > 1:
         max_index = max(range(len(result_list)), key=lambda x: result_list[x][1])
         result_list[0], result_list[max_index] = result_list[max_index], result_list[0]
     return result_list
@@ -44,6 +45,7 @@ def initialize_nlsh(_input):
     layers = constants[2]
     nodes = constants[3]
     input_dim = 320
+    global device 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     global model
     global inverted_file
@@ -62,8 +64,9 @@ def search_nlsh(q, num):
     global inverted_file
     bins_check = constants[4]
     global input_data
+    global device
     # prediction
-    query_tensor = torch.tensor(q, dtype=torch.float32).unsqueeze(0).view(1, -1)
+    query_tensor = torch.tensor(q, dtype=torch.float32, device=device).unsqueeze(0).view(1, -1)
     with torch.no_grad():
         logits = model(query_tensor)
         probs = F.softmax(logits, dim=1)
